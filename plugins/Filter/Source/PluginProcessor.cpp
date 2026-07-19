@@ -91,6 +91,9 @@ void BoDSPFilterAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 	if (auto* p = apvts.getRawParameterValue ("mix")) mix = p->load();
 
 	float peak = 0.0f;
+	bool clip = false;
+	if (auto* p = apvts.getRawParameterValue ("softClip"))
+		clip = p->load() > 0.5f;
 
 	for (int ch = 0; ch < totalNumInputChannels; ++ch)
 	{
@@ -99,7 +102,9 @@ void BoDSPFilterAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 		{
 			const float dry = ptr[n];
 			const float wet = filter.processSample (ch, dry);
-			const float out = dry * (1.0f - mix) + wet * mix;
+			float out = dry * (1.0f - mix) + wet * mix;
+			if (clip)
+				out = std::tanh (out);
 			ptr[n] = out;
 			peak = std::max (peak, std::fabs (out));
 		}
@@ -154,6 +159,9 @@ BoDSPFilterAudioProcessor::createParameterLayout()
 		"mix", "Mix",
 		juce::NormalisableRange<float> (0.0f, 1.0f),
 		1.0f));
+
+	params.push_back (std::make_unique<juce::AudioParameterBool> (
+		"softClip", "Clipper", false));
 
 	return { params.begin(), params.end() };
 }

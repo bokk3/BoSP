@@ -2,18 +2,30 @@
 #include "PluginEditor.h"
 
 //==============================================================================
-static void setupKnobStatic (juce::Slider& s, juce::Label& lbl, const juce::String& text,
+static void setupTechnoKnob (juce::Slider& s, juce::Label& lbl, const juce::String& text,
                               juce::Component* parent)
 {
 	s.setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
-	s.setTextBoxStyle (juce::Slider::TextBoxBelow, false, 70, 18);
+	s.setTextBoxStyle (juce::Slider::TextBoxBelow, false, 72, 18);
+	s.setColour (juce::Slider::rotarySliderFillColourId, juce::Colour (0xffff3300));    // Neon Orange/Red
+	s.setColour (juce::Slider::rotarySliderOutlineColourId, juce::Colour (0xff1f1f26)); // Dark metal
+	s.setColour (juce::Slider::thumbColourId, juce::Colour (0xffffffff));               // White indicator line
+	s.setColour (juce::Slider::textBoxTextColourId, juce::Colours::white);
+	s.setColour (juce::Slider::textBoxOutlineColourId, juce::Colours::transparentBlack);
 	parent->addAndMakeVisible (s);
 
 	lbl.setText (text, juce::dontSendNotification);
 	lbl.setJustificationType (juce::Justification::centred);
-	lbl.setFont (juce::Font (12.0f));
-	lbl.setColour (juce::Label::textColourId, juce::Colours::white);
+	lbl.setFont (juce::Font (12.0f, juce::Font::bold));
+	lbl.setColour (juce::Label::textColourId, juce::Colour (0xffa0a0ab));
 	parent->addAndMakeVisible (lbl);
+}
+
+static void setupTechnoToggle (juce::ToggleButton& b, juce::Component* parent)
+{
+	b.setColour (juce::ToggleButton::tickColourId, juce::Colour (0xffff3300));
+	b.setColour (juce::ToggleButton::textColourId, juce::Colours::white);
+	parent->addAndMakeVisible (b);
 }
 
 //==============================================================================
@@ -26,13 +38,13 @@ BoDSPReverbAudioProcessorEditor::BoDSPReverbAudioProcessorEditor (BoDSPReverbAud
 
 	auto& apvts = processorRef.apvts;
 
-	setupKnobStatic (roomSizeSlider, roomSizeLabel, "Room Size",  this);
-	setupKnobStatic (dampingSlider,  dampingLabel,  "Damping",    this);
-	setupKnobStatic (widthSlider,    widthLabel,    "Width",      this);
-	setupKnobStatic (mixSlider,      mixLabel,      "Mix",        this);
-	setupKnobStatic (preDelaySlider, preDelayLabel, "Pre-Delay",  this);
-	setupKnobStatic (lpSlider,       lpLabel,       "LP Cutoff",  this);
-	setupKnobStatic (hpSlider,       hpLabel,       "HP Cutoff",  this);
+	setupTechnoKnob (roomSizeSlider, roomSizeLabel, "Room Size",  this);
+	setupTechnoKnob (dampingSlider,  dampingLabel,  "Damping",    this);
+	setupTechnoKnob (widthSlider,    widthLabel,    "Width",      this);
+	setupTechnoKnob (mixSlider,      mixLabel,      "Mix",        this);
+	setupTechnoKnob (preDelaySlider, preDelayLabel, "Pre-Delay",  this);
+	setupTechnoKnob (lpSlider,       lpLabel,       "LP Cut",  this);
+	setupTechnoKnob (hpSlider,       hpLabel,       "HP Cut",  this);
 
 	preDelaySlider.setTextValueSuffix (" ms");
 	lpSlider.setTextValueSuffix (" Hz");
@@ -48,6 +60,10 @@ BoDSPReverbAudioProcessorEditor::BoDSPReverbAudioProcessorEditor (BoDSPReverbAud
 	lpAttach       = std::make_unique<Attach> (apvts, "lpCutoff",  lpSlider);
 	hpAttach       = std::make_unique<Attach> (apvts, "hpCutoff",  hpSlider);
 
+	// Clipper Toggle
+	setupTechnoToggle (clipToggle, this);
+	clipAttach = std::make_unique<ButtonAttach> (apvts, "softClip", clipToggle);
+
 	addAndMakeVisible (meter);
 	startTimerHz (30);
 }
@@ -57,21 +73,24 @@ BoDSPReverbAudioProcessorEditor::~BoDSPReverbAudioProcessorEditor() {}
 //==============================================================================
 void BoDSPReverbAudioProcessorEditor::paint (juce::Graphics& g)
 {
-	// Dark gradient background
-	juce::ColourGradient grad (juce::Colour (0xff0d0d1a), 0, 0,
-	                            juce::Colour (0xff1a1040), 0, (float) getHeight(), false);
+	// Hard Techno Gradient Background (hardware vibe)
+	juce::ColourGradient grad (juce::Colour (0xff07070a), 0, 0,
+	                            juce::Colour (0xff14121d), 0, (float) getHeight(), false);
 	g.setGradientFill (grad);
 	g.fillAll();
 
+	// Accent border lines (Neon red TR-909 theme)
+	g.setColour (juce::Colour (0x22ff3300));
+	g.drawRect (getLocalBounds(), 4.0f);
+
 	// Title
-	g.setColour (juce::Colour (0xffb0aaff));
+	g.setColour (juce::Colour (0xffff3300));
 	g.setFont (juce::Font (20.0f, juce::Font::bold));
-	g.drawFittedText ("BoDSP Reverb",
-	                  getLocalBounds().withHeight (36).withY (6),
+	g.drawFittedText ("BoDSP Reverb", getLocalBounds().withHeight (36).withY (6),
 	                  juce::Justification::centred, 1);
 
-	// Subtle separator below title
-	g.setColour (juce::Colour (0x33b0aaff));
+	// Subtle divider line
+	g.setColour (juce::Colour (0x33ff3300));
 	g.fillRect (20, 38, getWidth() - 40, 1);
 }
 
@@ -80,7 +99,7 @@ void BoDSPReverbAudioProcessorEditor::resized()
 	const int w = getWidth();
 	const int h = getHeight();
 
-	// Seven knobs in a row spread across the available width
+	// Knobs in a row
 	const int knobW = (w - 40) / 7;
 	const int knobH = juce::jmin (100, h - 120);
 	const int labelH = 18;
@@ -102,6 +121,10 @@ void BoDSPReverbAudioProcessorEditor::resized()
 	placeKnob (lpSlider,       lpLabel,       5);
 	placeKnob (hpSlider,       hpLabel,       6);
 
+	// Clipper placed next to title / top right header area
+	clipToggle.setBounds (w - 110, 8, 90, 24);
+
+	// Meter at the bottom
 	meter.setBounds (20, h - 42, w - 40, 22);
 }
 

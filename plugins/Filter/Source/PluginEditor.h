@@ -2,6 +2,7 @@
 
 #include "PluginProcessor.h"
 #include <juce_gui_basics/juce_gui_basics.h>
+#include <memory>
 #include <atomic>
 #include <cmath>
 
@@ -33,6 +34,11 @@ private:
 	// Labels
 	juce::Label freqLabel, qLabel, gainLabel, mixLabel;
 
+	// Toggles
+	juce::ToggleButton clipToggle { "Clipper" };
+	using ButtonAttach = juce::AudioProcessorValueTreeState::ButtonAttachment;
+	std::unique_ptr<ButtonAttach> clipAttach;
+
 	// Output meter
 	class MeterComponent : public juce::Component
 	{
@@ -42,26 +48,27 @@ private:
 
 		void paint (juce::Graphics& g) override
 		{
-			const auto b = getLocalBounds().toFloat();
-			g.fillAll (juce::Colour (0xff0d1a1a));
+			const auto bounds = getLocalBounds().toFloat();
+			g.fillAll (juce::Colour (0xff0d0d12));
 
 			const float lin = std::max (level, 1e-9f);
 			const float db  = 20.0f * std::log10 (lin);
-			float frac = juce::jlimit (0.0f, 1.0f, (db + 60.0f) / 66.0f);
+			const float minDb = -60.0f, maxDb = 6.0f;
+			float frac = juce::jlimit (0.0f, 1.0f, (db - minDb) / (maxDb - minDb));
+			const float fillW = bounds.getWidth() * frac;
 
-			juce::Colour col;
-			if (db > 0.0f)        col = juce::Colour (0xffaa00ff);
-			else if (db > -3.0f)  col = juce::Colour (0xffff4444);
-			else if (db > -6.0f)  col = juce::Colour (0xffffe066);
-			else                   col = juce::Colour (0xff33ccaa);
+			juce::ColourGradient meterGrad (juce::Colour (0xff39ff14), 0.0f, 0.0f,
+			                               juce::Colour (0xffff3300), bounds.getWidth(), 0.0f, false);
+			meterGrad.addColour (0.7f, juce::Colour (0xffffe066));
+			g.setGradientFill (meterGrad);
+			g.fillRect (bounds.withWidth (fillW));
 
-			g.setColour (col);
-			g.fillRect (b.withWidth (b.getWidth() * frac));
-			g.setColour (juce::Colours::black);
-			g.drawRect (b);
+			g.setColour (juce::Colour (0xff1f1f26));
+			g.drawRect (bounds, 1.5f);
+
 			g.setColour (juce::Colours::white);
-			g.setFont (11.0f);
-			g.drawText (juce::String (db, 1) + " dB", getLocalBounds(),
+			g.setFont (juce::Font (11.0f, juce::Font::bold));
+			g.drawText (juce::String (db, 1) + " dB", getLocalBounds().reduced (4, 0),
 			            juce::Justification::centredRight, false);
 		}
 	private:
