@@ -49,15 +49,22 @@ public:
 	void setTimeMs (float ms) noexcept { timeMs = std::clamp (ms, 0.1f, maxTimeMs()); }
 	void setMode (Mode m) noexcept { mode = m; }
 	void setFeedback (float f) noexcept { feedback = std::clamp (f, 0.0f, 0.99f); }
-	void setMix (float percent) noexcept { mix = std::clamp (percent * 0.01f, 0.0f, 1.0f); }
+	// Expect normalized mix in range [0.0, 1.0]. Previously this multiplied
+	// by 0.01 which treated the input as percent (0..100) and produced
+	// almost-zero wet levels when the APVTS provided a normalized value.
+	void setMix (float normalized) noexcept { mix = std::clamp (normalized, 0.0f, 1.0f); }
 	void setLP (float hz) noexcept { lp.setCutoffHz (hz); }
 	void setHP (float hz) noexcept { hp.setCutoffHz (hz); }
 
 	void setDuckParams (float thresholdDb, float ratioVal, float depthDb, float attackMs, float releaseMs) noexcept
 	{
+		// thresholdDb: level in dB where ducking starts (negative values typical)
+		// ratioVal: compression-like ratio (>1)
+		// depthDb: maximum attenuation expressed as a positive dB value (e.g. 18 means -18 dB max)
 		duckThresholdDb = thresholdDb;
 		duckRatio = std::max (1.0f, ratioVal);
-		duckDepthDb = std::min (0.0f, depthDb);
+		// Accept both negative or positive depth inputs; store as positive magnitude
+		duckDepthDb = std::abs (depthDb);
 		duckAttackMs = std::max (0.01f, attackMs);
 		duckReleaseMs = std::max (1.0f, releaseMs);
 		updateDuckCoefs();
@@ -176,7 +183,7 @@ private:
 	bool duckEnable { true };
 	float duckThresholdDb { -18.0f };
 	float duckRatio { 4.0f };
-	float duckDepthDb { -18.0f };
+	float duckDepthDb { 18.0f };
 	float duckAttackMs { 10.0f };
 	float duckReleaseMs { 200.0f };
 	float duckEnv { 0.0f };

@@ -96,6 +96,18 @@ void BoDSPDelayAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
 
 	float peak = 0.0f;
 
+	// Update parameters that may change per-block
+	if (auto* m = apvts.getRawParameterValue ("mix"))
+		delay.setMix (m->load());
+	if (auto* t = apvts.getRawParameterValue ("timeMs"))
+		delay.setTimeMs (t->load());
+	if (auto* f = apvts.getRawParameterValue ("feedback"))
+		delay.setFeedback (f->load());
+	if (auto* lp = apvts.getRawParameterValue ("lp"))
+		delay.setLP (lp->load());
+	if (auto* hp = apvts.getRawParameterValue ("hp"))
+		delay.setHP (hp->load());
+
 	// sample-by-sample processing to support ducking based on input level
 	for (int n = 0; n < numSamples; ++n)
 	{
