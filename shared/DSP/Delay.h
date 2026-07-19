@@ -49,7 +49,10 @@ public:
 	void setTimeMs (float ms) noexcept { timeMs = std::clamp (ms, 0.1f, maxTimeMs()); }
 	void setMode (Mode m) noexcept { mode = m; }
 	void setFeedback (float f) noexcept { feedback = std::clamp (f, 0.0f, 0.99f); }
-	void setMix (float percent) noexcept { mix = std::clamp (percent * 0.01f, 0.0f, 1.0f); }
+	// Expect normalized mix in range [0.0, 1.0]. Previously this multiplied
+	// by 0.01 which treated the input as percent (0..100) and produced
+	// almost-zero wet levels when the APVTS provided a normalized value.
+	void setMix (float normalized) noexcept { mix = std::clamp (normalized, 0.0f, 1.0f); }
 	void setLP (float hz) noexcept { lp.setCutoffHz (hz); }
 	void setHP (float hz) noexcept { hp.setCutoffHz (hz); }
 
