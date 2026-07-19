@@ -5,6 +5,7 @@
 // so it can be reused across plugins. No JUCE GUI dependencies.
 
 #include <cmath>
+#include <numbers>
 
 namespace bodsp
 {
@@ -79,7 +80,7 @@ public:
 				float mirrored = pos <= thresh ? pos : (2.0f * thresh - pos);
 
 				// Map to smooth curve using sin to avoid hard discontinuities
-				const float mapped = std::sin (juce::MathConstants<float>::halfPi * (mirrored / thresh));
+				const float mapped = std::sin (std::numbers::pi_v<float> * 0.5f * (mirrored / thresh));
 				return (x < 0.0f) ? -mapped : mapped;
 			}
 		}
