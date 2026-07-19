@@ -7,6 +7,9 @@
     <ClCompile Include="C:\Users\Boris\Documents\VSTDevelopment\BoSP\plugins\Distortion\Source\PluginEditor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="C:\Users\Boris\Documents\VSTDevelopment\BoSP\plugins\Distortion\Source\Parameters.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="C:\Users\Boris\Documents\VSTDevelopment\BoSP\external\JUCE\modules\juce_audio_processors\juce_audio_processors.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -76,6 +79,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="C:\Users\Boris\Documents\VSTDevelopment\BoSP\plugins\Distortion\Source\PluginEditor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Boris\Documents\VSTDevelopment\BoSP\plugins\Distortion\Source\Parameters.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

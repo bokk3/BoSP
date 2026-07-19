@@ -25,5 +25,13 @@ private:
     using DriveAttachment = juce::AudioProcessorValueTreeState::SliderAttachment;
     std::unique_ptr<DriveAttachment> driveAttachment;
 
+    juce::Slider outputSlider;
+    using OutputAttachment = juce::AudioProcessorValueTreeState::SliderAttachment;
+    std::unique_ptr<OutputAttachment> outputAttachment;
+
+    juce::ComboBox modeBox;
+    using ModeAttachment = juce::AudioProcessorValueTreeState::ComboBoxAttachment;
+    std::unique_ptr<ModeAttachment> modeAttachment;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BoDSPDistortionAudioProcessorEditor)
 };

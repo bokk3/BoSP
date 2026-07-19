@@ -5,6 +5,7 @@
 
 // shared DSP
 #include "../../../shared/DSP/Gain.h"
+#include "../../../shared/DSP/WaveShaper.h"
 
 //==============================================================================
 class BoDSPDistortionAudioProcessor final : public juce::AudioProcessor
@@ -56,6 +57,10 @@ private:
     // DSP components
     bodsp::Gain inputGain;
     bodsp::Gain outputGain;
+    bodsp::WaveShaper waveShaper;
+    // Smoothed output gain (linear)
+    juce::LinearSmoothedValue<float> outputSmoothed { 1.0f };
+    static constexpr double outputSmoothingTimeSeconds = 0.02; // 20 ms
 
     // Smoothed parameter for drive to avoid clicks when automating.
     juce::LinearSmoothedValue<float> driveSmoothed { 1.0f };

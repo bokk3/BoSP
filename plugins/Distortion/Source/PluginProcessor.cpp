@@ -5,6 +5,8 @@
 #include <memory>
 // shared DSP
 #include "../../../shared/DSP/Gain.h"
+#include "../../../shared/DSP/WaveShaper.h"
+#include <juce_dsp/juce_dsp.h>
 
 //==============================================================================
 BoDSPDistortionAudioProcessor::BoDSPDistortionAudioProcessor()
@@ -99,9 +101,13 @@ void BoDSPDistortionAudioProcessor::prepareToPlay (double sampleRate, int sample
 
     // Reset and initialize smoothing for drive parameter
     driveSmoothed.reset (sampleRate, driveSmoothingTimeSeconds);
+    outputSmoothed.reset (sampleRate, outputSmoothingTimeSeconds);
     // Initialize current/target value to the current parameter value
     if (auto* p = apvts.getRawParameterValue ("drive"))
         driveSmoothed.setCurrentAndTargetValue (p->load());
+
+    if (auto* outp = apvts.getRawParameterValue ("output"))
+        outputSmoothed.setCurrentAndTargetValue (juce::Decibels::decibelsToGain (outp->load()));
 }
 
 void BoDSPDistortionAudioProcessor::releaseResources()
@@ -164,7 +170,16 @@ void BoDSPDistortionAudioProcessor::processBlock (juce::AudioBuffer<float>& buff
     if (auto* p = apvts.getRawParameterValue ("drive"))
         driveTarget = p->load();
 
-    driveSmoothed.setTargetValue (driveTarget);
+    // driveTarget supplied in decibels. Convert to linear gain before smoothing.
+    const float driveLinearTarget = juce::Decibels::decibelsToGain (driveTarget);
+    driveSmoothed.setTargetValue (driveLinearTarget);
+
+    // Update output target (in dB -> linear) for smoothing
+    if (auto* outp = apvts.getRawParameterValue ("output"))
+    {
+        const float outLinear = juce::Decibels::decibelsToGain (outp->load());
+        outputSmoothed.setTargetValue (outLinear);
+    }
 
     const int numSamples = buffer.getNumSamples();
 
@@ -172,12 +187,19 @@ void BoDSPDistortionAudioProcessor::processBlock (juce::AudioBuffer<float>& buff
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
         inputGain.process (buffer.getWritePointer (channel), numSamples);
 
-    // Apply per-sample drive smoothing (shared across channels)
+    // Apply per-sample drive smoothing (shared across channels), waveshaper, and smoothed output
     for (int sample = 0; sample < numSamples; ++sample)
     {
-        const float g = driveSmoothed.getNextValue();
+        const float driveG = driveSmoothed.getNextValue();
+        const float outG = outputSmoothed.getNextValue();
+
         for (int channel = 0; channel < totalNumInputChannels; ++channel)
-            buffer.getWritePointer (channel)[sample] *= g;
+        {
+            float* ptr = buffer.getWritePointer (channel);
+            float s = ptr[sample] * driveG;     // apply drive (pre-waveshaper)
+            s = waveShaper.process (s);         // apply waveshaper
+            ptr[sample] = s * outG;            // apply smoothed output gain
+        }
     }
 
     // Apply output gain per-channel (constant multiplier)
@@ -221,10 +243,23 @@ BoDSPDistortionAudioProcessor::createParameterLayout()
 {
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
 
+    // Drive in dB: 0 -> +24 dB (musician-friendly). We'll convert to linear before use.
     params.push_back (std::make_unique<juce::AudioParameterFloat> (
-        "drive", "Drive",
-        juce::NormalisableRange<float> (0.0f, 2.0f),
-        1.0f));
+        "drive", "Drive (dB)",
+        juce::NormalisableRange<float> (0.0f, 24.0f),
+        0.0f));
+
+    // Output gain in dB
+    params.push_back (std::make_unique<juce::AudioParameterFloat> (
+        "output", "Output (dB)",
+        juce::NormalisableRange<float> (-24.0f, 24.0f),
+        0.0f));
+
+    // Mode selector: Soft, Tube, Hard, Fold
+    params.push_back (std::make_unique<juce::AudioParameterChoice> (
+        "mode", "Mode",
+        juce::StringArray { "Soft", "Tube", "Hard", "Fold" },
+        0));
 
     return { params.begin(), params.end() };
 }

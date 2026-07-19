@@ -308,6 +308,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClInclude Include="C:\Users\Boris\Documents\VSTDevelopment\BoSP\plugins\Distortion\Source\PluginProcessor.h" />
     <ClCompile Include="C:\Users\Boris\Documents\VSTDevelopment\BoSP\plugins\Distortion\Source\PluginEditor.cpp" />
     <ClInclude Include="C:\Users\Boris\Documents\VSTDevelopment\BoSP\plugins\Distortion\Source\PluginEditor.h" />
+    <ClInclude Include="C:\Users\Boris\Documents\VSTDevelopment\BoSP\plugins\Distortion\Source\Parameters.h" />
+    <ClCompile Include="C:\Users\Boris\Documents\VSTDevelopment\BoSP\plugins\Distortion\Source\Parameters.cpp" />
     <ClCompile Include="C:\Users\Boris\Documents\VSTDevelopment\BoSP\external\JUCE\modules\juce_audio_processors\juce_audio_processors.cpp" />
     <ClCompile Include="C:\Users\Boris\Documents\VSTDevelopment\BoSP\external\JUCE\modules\juce_gui_extra\juce_gui_extra.cpp" />
     <ClCompile Include="C:\Users\Boris\Documents\VSTDevelopment\BoSP\external\JUCE\modules\juce_gui_basics\juce_gui_basics.cpp" />
