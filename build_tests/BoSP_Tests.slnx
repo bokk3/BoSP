@@ -9,6 +9,7 @@
 	</Configurations>
 	<Project Path="ALL_BUILD.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="6fb4d623-8907-3884-b231-aaa6fb8d42bc" DefaultStartup="true">
 		<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+		<BuildDependency Project="test_filter.vcxproj"/>
 		<BuildDependency Project="test_reverb.vcxproj"/>
 		<BuildDependency Project="test_waveshaper.vcxproj"/>
 		<Build Solution="Debug|*" Project="false"/>
@@ -24,6 +25,9 @@
 		<Build Solution="RelWithDebInfo|*" Project="false"/>
 	</Project>
 	<Project Path="ZERO_CHECK.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="ee31a480-d553-3694-96f1-0292d88efbd5"/>
+	<Project Path="test_filter.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="f6212694-b828-3b28-9a9f-ffb7b4766c17">
+		<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+	</Project>
 	<Project Path="test_reverb.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="25878952-a169-3e8c-847c-b320d9f058ae">
 		<BuildDependency Project="ZERO_CHECK.vcxproj"/>
 	</Project>

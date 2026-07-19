@@ -7,43 +7,43 @@
 #include <cmath>
 
 //==============================================================================
-class BoDSPReverbAudioProcessorEditor final : public juce::AudioProcessorEditor,
+class BoDSPFilterAudioProcessorEditor final : public juce::AudioProcessorEditor,
                                               private juce::Timer
 {
 public:
-	explicit BoDSPReverbAudioProcessorEditor (BoDSPReverbAudioProcessor&);
-	~BoDSPReverbAudioProcessorEditor() override;
+	explicit BoDSPFilterAudioProcessorEditor (BoDSPFilterAudioProcessor&);
+	~BoDSPFilterAudioProcessorEditor() override;
 
 	void timerCallback() override;
 	void paint (juce::Graphics&) override;
 	void resized() override;
 
 private:
-	BoDSPReverbAudioProcessor& processorRef;
+	BoDSPFilterAudioProcessor& processorRef;
 
-	// --- Sliders ---
-	juce::Slider roomSizeSlider, dampingSlider, widthSlider,
-	             mixSlider, preDelaySlider, lpSlider, hpSlider;
+	// Mode selector
+	juce::ComboBox modeBox;
+	using ModeAttach = juce::AudioProcessorValueTreeState::ComboBoxAttachment;
+	std::unique_ptr<ModeAttach> modeAttach;
 
+	// Knobs
+	juce::Slider freqSlider, qSlider, gainSlider, mixSlider;
 	using Attach = juce::AudioProcessorValueTreeState::SliderAttachment;
-	std::unique_ptr<Attach> roomSizeAttach, dampingAttach, widthAttach,
-	                        mixAttach, preDelayAttach, lpAttach, hpAttach;
+	std::unique_ptr<Attach> freqAttach, qAttach, gainAttach, mixAttach;
 
-	// --- Labels ---
-	juce::Label roomSizeLabel, dampingLabel, widthLabel,
-	            mixLabel, preDelayLabel, lpLabel, hpLabel;
+	// Labels
+	juce::Label freqLabel, qLabel, gainLabel, mixLabel;
 
-	// --- Toggles ---
+	// Toggles
 	juce::ToggleButton clipToggle { "Clipper" };
 	using ButtonAttach = juce::AudioProcessorValueTreeState::ButtonAttachment;
 	std::unique_ptr<ButtonAttach> clipAttach;
 
-	// --- Output meter ---
+	// Output meter
 	class MeterComponent : public juce::Component
 	{
 	public:
 		MeterComponent() = default;
-
 		void setLevel (float v) noexcept { level = v; repaint(); }
 
 		void paint (juce::Graphics& g) override
@@ -68,12 +68,12 @@ private:
 
 			g.setColour (juce::Colours::white);
 			g.setFont (juce::Font (11.0f, juce::Font::bold));
-			g.drawText (juce::String (db, 1) + " dB",
-			            getLocalBounds().reduced (4, 0), juce::Justification::centredRight, false);
+			g.drawText (juce::String (db, 1) + " dB", getLocalBounds().reduced (4, 0),
+			            juce::Justification::centredRight, false);
 		}
 	private:
 		float level { 0.0f };
 	} meter;
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BoDSPReverbAudioProcessorEditor)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BoDSPFilterAudioProcessorEditor)
 };

@@ -108,6 +108,10 @@ void BoDSPDelayAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
 	if (auto* hp = apvts.getRawParameterValue ("hp"))
 		delay.setHP (hp->load());
 
+	bool clip = false;
+	if (auto* p = apvts.getRawParameterValue ("softClip"))
+		clip = p->load() > 0.5f;
+
 	// sample-by-sample processing to support ducking based on input level
 	for (int n = 0; n < numSamples; ++n)
 	{
@@ -120,7 +124,9 @@ void BoDSPDelayAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
 		{
 			float* ptr = buffer.getWritePointer (ch);
 			const float dry = ptr[n];
-			const float processed = delay.processSample (ch, dry, inLevel);
+			float processed = delay.processSample (ch, dry, inLevel);
+			if (clip)
+				processed = std::tanh (processed);
 			ptr[n] = processed;
 			peak = std::max (peak, std::fabs (processed));
 		}
@@ -169,6 +175,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout BoDSPDelayAudioProcessor::cr
 		juce::NormalisableRange<float> (0.1f, 200.0f), 10.0f));
 	params.push_back (std::make_unique<juce::AudioParameterFloat> ("duckRelease", "Duck Release (ms)",
 		juce::NormalisableRange<float> (10.0f, 2000.0f), 200.0f));
+
+	params.push_back (std::make_unique<juce::AudioParameterBool> ("softClip", "Clipper", false));
 
 	return { params.begin(), params.end() };
 }

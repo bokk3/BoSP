@@ -83,6 +83,9 @@ void BoDSPReverbAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
 	float* ptrR = (totalNumInputChannels > 1) ? buffer.getWritePointer (1) : nullptr;
 
 	float peak = 0.0f;
+	bool clip = false;
+	if (auto* p = apvts.getRawParameterValue ("softClip"))
+		clip = p->load() > 0.5f;
 
 	for (int n = 0; n < numSamples; ++n)
 	{
@@ -92,6 +95,12 @@ void BoDSPReverbAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
 		float outL = 0.0f;
 		float outR = 0.0f;
 		reverb.processSample (inL, inR, outL, outR);
+
+		if (clip)
+		{
+			outL = std::tanh (outL);
+			outR = std::tanh (outR);
+		}
 
 		ptrL[n] = outL;
 		if (ptrR != nullptr)
@@ -144,6 +153,9 @@ juce::AudioProcessorValueTreeState::ParameterLayout BoDSPReverbAudioProcessor::c
 	params.push_back (std::make_unique<juce::AudioParameterFloat> (
 		"hpCutoff", "HP Cutoff",
 		juce::NormalisableRange<float> (10.0f, 1000.0f, 1.0f, 0.5f), 20.0f));
+
+	params.push_back (std::make_unique<juce::AudioParameterBool> (
+		"softClip", "Clipper", false));
 
 	return { params.begin(), params.end() };
 }

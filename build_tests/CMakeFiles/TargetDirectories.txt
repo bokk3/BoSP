@@ -1,5 +1,6 @@
 C:/Users/Boris/Documents/VSTDevelopment/BoSP/build_tests/CMakeFiles/test_waveshaper.dir
 C:/Users/Boris/Documents/VSTDevelopment/BoSP/build_tests/CMakeFiles/test_reverb.dir
+C:/Users/Boris/Documents/VSTDevelopment/BoSP/build_tests/CMakeFiles/test_filter.dir
 C:/Users/Boris/Documents/VSTDevelopment/BoSP/build_tests/CMakeFiles/RUN_TESTS.dir
 C:/Users/Boris/Documents/VSTDevelopment/BoSP/build_tests/CMakeFiles/ALL_BUILD.dir
 C:/Users/Boris/Documents/VSTDevelopment/BoSP/build_tests/CMakeFiles/ZERO_CHECK.dir
