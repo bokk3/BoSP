@@ -1,0 +1,36 @@
+# CMake generated Testfile for 
+# Source directory: C:/Users/Boris/Documents/VSTDevelopment/BoSP/tests
+# Build directory: C:/Users/Boris/Documents/VSTDevelopment/BoSP/build_tests
+# 
+# This file includes the relevant testing commands required for 
+# testing this directory and lists subdirectories to be tested as well.
+if(CTEST_CONFIGURATION_TYPE MATCHES "^([Dd][Ee][Bb][Uu][Gg])$")
+  add_test("WaveShaperTests" "C:/Users/Boris/Documents/VSTDevelopment/BoSP/build_tests/Debug/test_waveshaper.exe")
+  set_tests_properties("WaveShaperTests" PROPERTIES  _BACKTRACE_TRIPLES "C:/Users/Boris/Documents/VSTDevelopment/BoSP/tests/CMakeLists.txt;17;add_test;C:/Users/Boris/Documents/VSTDevelopment/BoSP/tests/CMakeLists.txt;0;")
+elseif(CTEST_CONFIGURATION_TYPE MATCHES "^([Rr][Ee][Ll][Ee][Aa][Ss][Ee])$")
+  add_test("WaveShaperTests" "C:/Users/Boris/Documents/VSTDevelopment/BoSP/build_tests/Release/test_waveshaper.exe")
+  set_tests_properties("WaveShaperTests" PROPERTIES  _BACKTRACE_TRIPLES "C:/Users/Boris/Documents/VSTDevelopment/BoSP/tests/CMakeLists.txt;17;add_test;C:/Users/Boris/Documents/VSTDevelopment/BoSP/tests/CMakeLists.txt;0;")
+elseif(CTEST_CONFIGURATION_TYPE MATCHES "^([Mm][Ii][Nn][Ss][Ii][Zz][Ee][Rr][Ee][Ll])$")
+  add_test("WaveShaperTests" "C:/Users/Boris/Documents/VSTDevelopment/BoSP/build_tests/MinSizeRel/test_waveshaper.exe")
+  set_tests_properties("WaveShaperTests" PROPERTIES  _BACKTRACE_TRIPLES "C:/Users/Boris/Documents/VSTDevelopment/BoSP/tests/CMakeLists.txt;17;add_test;C:/Users/Boris/Documents/VSTDevelopment/BoSP/tests/CMakeLists.txt;0;")
+elseif(CTEST_CONFIGURATION_TYPE MATCHES "^([Rr][Ee][Ll][Ww][Ii][Tt][Hh][Dd][Ee][Bb][Ii][Nn][Ff][Oo])$")
+  add_test("WaveShaperTests" "C:/Users/Boris/Documents/VSTDevelopment/BoSP/build_tests/RelWithDebInfo/test_waveshaper.exe")
+  set_tests_properties("WaveShaperTests" PROPERTIES  _BACKTRACE_TRIPLES "C:/Users/Boris/Documents/VSTDevelopment/BoSP/tests/CMakeLists.txt;17;add_test;C:/Users/Boris/Documents/VSTDevelopment/BoSP/tests/CMakeLists.txt;0;")
+else()
+  add_test("WaveShaperTests" NOT_AVAILABLE)
+endif()
+if(CTEST_CONFIGURATION_TYPE MATCHES "^([Dd][Ee][Bb][Uu][Gg])$")
+  add_test("ReverbTests" "C:/Users/Boris/Documents/VSTDevelopment/BoSP/build_tests/Debug/test_reverb.exe")
+  set_tests_properties("ReverbTests" PROPERTIES  _BACKTRACE_TRIPLES "C:/Users/Boris/Documents/VSTDevelopment/BoSP/tests/CMakeLists.txt;18;add_test;C:/Users/Boris/Documents/VSTDevelopment/BoSP/tests/CMakeLists.txt;0;")
+elseif(CTEST_CONFIGURATION_TYPE MATCHES "^([Rr][Ee][Ll][Ee][Aa][Ss][Ee])$")
+  add_test("ReverbTests" "C:/Users/Boris/Documents/VSTDevelopment/BoSP/build_tests/Release/test_reverb.exe")
+  set_tests_properties("ReverbTests" PROPERTIES  _BACKTRACE_TRIPLES "C:/Users/Boris/Documents/VSTDevelopment/BoSP/tests/CMakeLists.txt;18;add_test;C:/Users/Boris/Documents/VSTDevelopment/BoSP/tests/CMakeLists.txt;0;")
+elseif(CTEST_CONFIGURATION_TYPE MATCHES "^([Mm][Ii][Nn][Ss][Ii][Zz][Ee][Rr][Ee][Ll])$")
+  add_test("ReverbTests" "C:/Users/Boris/Documents/VSTDevelopment/BoSP/build_tests/MinSizeRel/test_reverb.exe")
+  set_tests_properties("ReverbTests" PROPERTIES  _BACKTRACE_TRIPLES "C:/Users/Boris/Documents/VSTDevelopment/BoSP/tests/CMakeLists.txt;18;add_test;C:/Users/Boris/Documents/VSTDevelopment/BoSP/tests/CMakeLists.txt;0;")
+elseif(CTEST_CONFIGURATION_TYPE MATCHES "^([Rr][Ee][Ll][Ww][Ii][Tt][Hh][Dd][Ee][Bb][Ii][Nn][Ff][Oo])$")
+  add_test("ReverbTests" "C:/Users/Boris/Documents/VSTDevelopment/BoSP/build_tests/RelWithDebInfo/test_reverb.exe")
+  set_tests_properties("ReverbTests" PROPERTIES  _BACKTRACE_TRIPLES "C:/Users/Boris/Documents/VSTDevelopment/BoSP/tests/CMakeLists.txt;18;add_test;C:/Users/Boris/Documents/VSTDevelopment/BoSP/tests/CMakeLists.txt;0;")
+else()
+  add_test("ReverbTests" NOT_AVAILABLE)
+endif()
