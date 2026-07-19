@@ -58,9 +58,13 @@ public:
 
 	void setDuckParams (float thresholdDb, float ratioVal, float depthDb, float attackMs, float releaseMs) noexcept
 	{
+		// thresholdDb: level in dB where ducking starts (negative values typical)
+		// ratioVal: compression-like ratio (>1)
+		// depthDb: maximum attenuation expressed as a positive dB value (e.g. 18 means -18 dB max)
 		duckThresholdDb = thresholdDb;
 		duckRatio = std::max (1.0f, ratioVal);
-		duckDepthDb = std::min (0.0f, depthDb);
+		// Accept both negative or positive depth inputs; store as positive magnitude
+		duckDepthDb = std::abs (depthDb);
 		duckAttackMs = std::max (0.01f, attackMs);
 		duckReleaseMs = std::max (1.0f, releaseMs);
 		updateDuckCoefs();
@@ -179,7 +183,7 @@ private:
 	bool duckEnable { true };
 	float duckThresholdDb { -18.0f };
 	float duckRatio { 4.0f };
-	float duckDepthDb { -18.0f };
+	float duckDepthDb { 18.0f };
 	float duckAttackMs { 10.0f };
 	float duckReleaseMs { 200.0f };
 	float duckEnv { 0.0f };
