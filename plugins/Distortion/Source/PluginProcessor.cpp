@@ -3,6 +3,8 @@
 // STL
 #include <vector>
 #include <memory>
+// shared DSP
+#include "../../../shared/DSP/Gain.h"
 
 //==============================================================================
 BoDSPDistortionAudioProcessor::BoDSPDistortionAudioProcessor()
@@ -90,9 +92,16 @@ void BoDSPDistortionAudioProcessor::changeProgramName (int index, const juce::St
 //==============================================================================
 void BoDSPDistortionAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    // Use this method as the place to do any pre-playback
-    // initialisation that you need..
-    juce::ignoreUnused (sampleRate, samplesPerBlock);
+    juce::ignoreUnused (samplesPerBlock);
+
+    inputGain.prepare (sampleRate);
+    outputGain.prepare (sampleRate);
+
+    // Reset and initialize smoothing for drive parameter
+    driveSmoothed.reset (sampleRate, driveSmoothingTimeSeconds);
+    // Initialize current/target value to the current parameter value
+    if (auto* p = apvts.getRawParameterValue ("drive"))
+        driveSmoothed.setCurrentAndTargetValue (p->load());
 }
 
 void BoDSPDistortionAudioProcessor::releaseResources()
@@ -149,17 +158,33 @@ void BoDSPDistortionAudioProcessor::processBlock (juce::AudioBuffer<float>& buff
     // the samples and the outer loop is handling the channels.
     // Alternatively, you can process the samples with the channels
     // interleaved by keeping the same state.
-    // Read the 'drive' parameter from the apvts. If it's not available, default to 1.0f.
-    float drive = 1.0f;
+    // Read the 'drive' parameter (target) and set the smoother. The smoother
+    // will be sampled once per audio sample below (shared across channels).
+    float driveTarget = 1.0f;
     if (auto* p = apvts.getRawParameterValue ("drive"))
-        drive = p->load();
+        driveTarget = p->load();
 
+    driveSmoothed.setTargetValue (driveTarget);
+
+    const int numSamples = buffer.getNumSamples();
+
+    // Apply input gain per-channel (constant multiplier)
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
+        inputGain.process (buffer.getWritePointer (channel), numSamples);
+
+    // Apply per-sample drive smoothing (shared across channels)
+    for (int sample = 0; sample < numSamples; ++sample)
     {
-        auto* channelData = buffer.getWritePointer (channel);
-        // Simple test processing: apply a gain based on the drive parameter.
-        for (int i = 0; i < buffer.getNumSamples(); ++i)
-            channelData[i] = channelData[i] * drive;
+        const float g = driveSmoothed.getNextValue();
+        for (int channel = 0; channel < totalNumInputChannels; ++channel)
+            buffer.getWritePointer (channel)[sample] *= g;
+    }
+
+    // Apply output gain per-channel (constant multiplier)
+    for (int channel = 0; channel < totalNumOutputChannels; ++channel)
+    {
+        if (channel < totalNumInputChannels)
+            outputGain.process (buffer.getWritePointer (channel), numSamples);
     }
 }
 

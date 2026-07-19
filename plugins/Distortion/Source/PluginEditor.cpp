@@ -9,6 +9,13 @@ BoDSPDistortionAudioProcessorEditor::BoDSPDistortionAudioProcessorEditor (BoDSPD
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
     setSize (400, 300);
+
+    // Drive slider
+    driveSlider.setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
+    driveSlider.setTextBoxStyle (juce::Slider::TextBoxBelow, false, 60, 20);
+    addAndMakeVisible (driveSlider);
+
+    driveAttachment = std::make_unique<DriveAttachment> (processorRef.apvts, "drive", driveSlider);
 }
 
 BoDSPDistortionAudioProcessorEditor::~BoDSPDistortionAudioProcessorEditor()
@@ -30,4 +37,5 @@ void BoDSPDistortionAudioProcessorEditor::resized()
 {
     // This is generally where you'll want to lay out the positions of any
     // subcomponents in your editor..
+    driveSlider.setBounds (40, 40, 120, 120);
 }

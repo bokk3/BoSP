@@ -1,6 +1,10 @@
 #pragma once
 
 #include <juce_audio_processors/juce_audio_processors.h>
+#include <juce_audio_basics/juce_audio_basics.h>
+
+// shared DSP
+#include "../../../shared/DSP/Gain.h"
 
 //==============================================================================
 class BoDSPDistortionAudioProcessor final : public juce::AudioProcessor
@@ -49,6 +53,13 @@ public:
     static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
 
 private:
+    // DSP components
+    bodsp::Gain inputGain;
+    bodsp::Gain outputGain;
+
+    // Smoothed parameter for drive to avoid clicks when automating.
+    juce::LinearSmoothedValue<float> driveSmoothed { 1.0f };
+    static constexpr double driveSmoothingTimeSeconds = 0.02; // 20 ms
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BoDSPDistortionAudioProcessor)
 };
