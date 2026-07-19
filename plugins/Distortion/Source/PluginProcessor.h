@@ -6,6 +6,8 @@
 // shared DSP
 #include "../../../shared/DSP/Gain.h"
 #include "../../../shared/DSP/WaveShaper.h"
+#include "../../../shared/DSP/Tone.h"
+#include <atomic>
 
 //==============================================================================
 class BoDSPDistortionAudioProcessor final : public juce::AudioProcessor
@@ -14,6 +16,9 @@ public:
     //==============================================================================
     BoDSPDistortionAudioProcessor();
     ~BoDSPDistortionAudioProcessor() override;
+
+    // Returns the last measured output peak (linear)
+    float getOutputMeter() const noexcept { return outputMeter.load(); }
 
     //==============================================================================
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
@@ -58,9 +63,20 @@ private:
     bodsp::Gain inputGain;
     bodsp::Gain outputGain;
     bodsp::WaveShaper waveShaper;
+    bodsp::Tone toneFilter;
     // Smoothed output gain (linear)
     juce::LinearSmoothedValue<float> outputSmoothed { 1.0f };
     static constexpr double outputSmoothingTimeSeconds = 0.02; // 20 ms
+
+    // Dry/Wet
+    static constexpr float defaultMix = 1.0f; // 1.0 == fully wet
+    float mix { defaultMix };
+
+    // Parameter change caching
+    int lastModeIndex { -1 };
+    bool lastSoftClip { false };
+    // Output meter (peak, linear)
+    std::atomic<float> outputMeter { 0.0f };
 
     // Smoothed parameter for drive to avoid clicks when automating.
     juce::LinearSmoothedValue<float> driveSmoothed { 1.0f };

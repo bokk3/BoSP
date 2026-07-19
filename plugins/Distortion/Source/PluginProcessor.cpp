@@ -98,6 +98,7 @@ void BoDSPDistortionAudioProcessor::prepareToPlay (double sampleRate, int sample
 
     inputGain.prepare (sampleRate);
     outputGain.prepare (sampleRate);
+    toneFilter.prepare (sampleRate, (int) getTotalNumInputChannels());
 
     // Reset and initialize smoothing for drive parameter
     driveSmoothed.reset (sampleRate, driveSmoothingTimeSeconds);
@@ -108,6 +109,20 @@ void BoDSPDistortionAudioProcessor::prepareToPlay (double sampleRate, int sample
 
     if (auto* outp = apvts.getRawParameterValue ("output"))
         outputSmoothed.setCurrentAndTargetValue (juce::Decibels::decibelsToGain (outp->load()));
+
+    // initialize cached mode and soft clip flags
+    if (auto* m = apvts.getRawParameterValue ("mode"))
+        lastModeIndex = static_cast<int> (m->load());
+    if (auto* sc = apvts.getRawParameterValue ("softClip0db"))
+        lastSoftClip = sc->load() > 0.5f;
+    waveShaper.setMode (static_cast<bodsp::WaveShaper::Mode> (lastModeIndex));
+    waveShaper.setSoftClipAt0dB (lastSoftClip);
+
+    // Initialize mix and tone values
+    if (auto* mixp = apvts.getRawParameterValue ("mix"))
+        mix = mixp->load() * 0.01f;
+    if (auto* tonep = apvts.getRawParameterValue ("tone"))
+        toneFilter.setCutoffHz (tonep->load());
 }
 
 void BoDSPDistortionAudioProcessor::releaseResources()
@@ -173,6 +188,32 @@ void BoDSPDistortionAudioProcessor::processBlock (juce::AudioBuffer<float>& buff
     // driveTarget supplied in decibels. Convert to linear gain before smoothing.
     const float driveLinearTarget = juce::Decibels::decibelsToGain (driveTarget);
     driveSmoothed.setTargetValue (driveLinearTarget);
+    // Update wave shaper mode and soft-clip option only when changed
+    if (auto* m = apvts.getRawParameterValue ("mode"))
+    {
+        const int modeIndex = static_cast<int> (m->load());
+        if (modeIndex != lastModeIndex)
+        {
+            lastModeIndex = modeIndex;
+            waveShaper.setMode (static_cast<bodsp::WaveShaper::Mode> (modeIndex));
+        }
+    }
+
+    if (auto* sc = apvts.getRawParameterValue ("softClip0db"))
+    {
+        const bool scVal = sc->load() > 0.5f;
+        if (scVal != lastSoftClip)
+        {
+            lastSoftClip = scVal;
+            waveShaper.setSoftClipAt0dB (scVal);
+        }
+    }
+
+    // Update mix and tone per-block (mix is fraction 0..1)
+    if (auto* mixp = apvts.getRawParameterValue ("mix"))
+        mix = mixp->load() * 0.01f;
+    if (auto* tonep = apvts.getRawParameterValue ("tone"))
+        toneFilter.setCutoffHz (tonep->load());
 
     // Update output target (in dB -> linear) for smoothing
     if (auto* outp = apvts.getRawParameterValue ("output"))
@@ -182,12 +223,15 @@ void BoDSPDistortionAudioProcessor::processBlock (juce::AudioBuffer<float>& buff
     }
 
     const int numSamples = buffer.getNumSamples();
+    float peak = 0.0f;
 
     // Apply input gain per-channel (constant multiplier)
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
         inputGain.process (buffer.getWritePointer (channel), numSamples);
 
-    // Apply per-sample drive smoothing (shared across channels), waveshaper, and smoothed output
+    // Apply per-sample drive smoothing (shared across channels), waveshaper,
+    // tone filter, dry/wet mix and smoothed output. We capture the dry
+    // sample (post-input gain) and process the wet path, then mix.
     for (int sample = 0; sample < numSamples; ++sample)
     {
         const float driveG = driveSmoothed.getNextValue();
@@ -196,18 +240,36 @@ void BoDSPDistortionAudioProcessor::processBlock (juce::AudioBuffer<float>& buff
         for (int channel = 0; channel < totalNumInputChannels; ++channel)
         {
             float* ptr = buffer.getWritePointer (channel);
-            float s = ptr[sample] * driveG;     // apply drive (pre-waveshaper)
-            s = waveShaper.process (s);         // apply waveshaper
-            ptr[sample] = s * outG;            // apply smoothed output gain
+            const float dry = ptr[sample];
+
+            // Wet path
+            float s = dry * driveG;                  // apply drive (pre-waveshaper)
+            s = waveShaper.process (s);              // apply waveshaper
+            s = toneFilter.processSample (channel, s); // apply tone filter
+
+            // Mix dry/wet and apply output smoothing
+            const float outSample = s * mix + dry * (1.0f - mix);
+            float finalOut = outSample * outG;
+
+            // Apply final soft clip at 0 dB if enabled. This ensures the
+            // last element in the chain prevents output exceeding 0 dBFS.
+            if (lastSoftClip)
+            {
+                // Use tanh normalization to softly clamp peaks to +/-1.0
+                const float t = std::tanh (finalOut);
+                finalOut = t * (1.0f / std::tanh (1.0f));
+            }
+
+            ptr[sample] = finalOut;
+
+            // track peak across channels/samples
+            const float absOut = std::fabs (finalOut);
+            if (absOut > peak) peak = absOut;
         }
     }
 
-    // Apply output gain per-channel (constant multiplier)
-    for (int channel = 0; channel < totalNumOutputChannels; ++channel)
-    {
-        if (channel < totalNumInputChannels)
-            outputGain.process (buffer.getWritePointer (channel), numSamples);
-    }
+    // Publish peak to meter (atomic, real-time safe)
+    outputMeter.store (peak);
 }
 
 //==============================================================================
@@ -255,11 +317,27 @@ BoDSPDistortionAudioProcessor::createParameterLayout()
         juce::NormalisableRange<float> (-24.0f, 24.0f),
         0.0f));
 
+    // Mix (dry/wet) percentage
+    params.push_back (std::make_unique<juce::AudioParameterFloat> (
+        "mix", "Mix",
+        juce::NormalisableRange<float> (0.0f, 100.0f),
+        100.0f));
+
+    // Tone control: cutoff frequency in Hz
+    params.push_back (std::make_unique<juce::AudioParameterFloat> (
+        "tone", "Tone",
+        juce::NormalisableRange<float> (20.0f, 20000.0f, 1.0f, 0.5f),
+        10000.0f));
+
     // Mode selector: Soft, Tube, Hard, Fold
     params.push_back (std::make_unique<juce::AudioParameterChoice> (
         "mode", "Mode",
         juce::StringArray { "Soft", "Tube", "Hard", "Fold" },
         0));
+
+    // Soft clip at 0 dB toggle
+    params.push_back (std::make_unique<juce::AudioParameterBool> (
+        "softClip0db", "Soft Clip at 0 dB", false));
 
     return { params.begin(), params.end() };
 }

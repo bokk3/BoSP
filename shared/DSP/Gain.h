@@ -34,6 +34,8 @@ public:
 			samples[i] *= gain;
 	}
 
+	float getGainLinear() const noexcept { return gain; }
+
 	// Process interleaved channels is intentionally not provided; processors should
 	// call process per-channel to avoid dependencies on buffer layouts.
 

@@ -34,6 +34,33 @@ BoDSPDistortionAudioProcessorEditor::BoDSPDistortionAudioProcessorEditor (BoDSPD
     modeBox.addItem ("Fold", 4);
     addAndMakeVisible (modeBox);
     modeAttachment = std::make_unique<ModeAttachment> (processorRef.apvts, "mode", modeBox);
+
+    // Soft clip toggle
+    addAndMakeVisible (softClipToggle);
+    softClipAttachment = std::make_unique<SoftClipAttachment> (processorRef.apvts, "softClip0db", softClipToggle);
+
+    // Mix slider (dry/wet)
+    mixSlider.setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
+    mixSlider.setTextBoxStyle (juce::Slider::TextBoxBelow, false, 60, 20);
+    mixSlider.setTextValueSuffix (" %");
+    mixSlider.setRange (0.0, 100.0, 0.1);
+    addAndMakeVisible (mixSlider);
+    mixAttachment = std::make_unique<MixAttachment> (processorRef.apvts, "mix", mixSlider);
+
+    // Tone slider
+    toneSlider.setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
+    toneSlider.setTextBoxStyle (juce::Slider::TextBoxBelow, false, 60, 20);
+    toneSlider.setTextValueSuffix (" Hz");
+    toneSlider.setRange (20.0, 20000.0, 1.0);
+    toneSlider.setSkewFactorFromMidPoint (1000.0); // logarithmic feel
+    addAndMakeVisible (toneSlider);
+    toneAttachment = std::make_unique<ToneAttachment> (processorRef.apvts, "tone", toneSlider);
+
+    // Meter
+    addAndMakeVisible (meter);
+
+    // Start timer to refresh meter (30 Hz)
+    startTimerHz (30);
 }
 
 BoDSPDistortionAudioProcessorEditor::~BoDSPDistortionAudioProcessorEditor()
@@ -56,7 +83,18 @@ void BoDSPDistortionAudioProcessorEditor::resized()
 {
     // This is generally where you'll want to lay out the positions of any
     // subcomponents in your editor..
-    driveSlider.setBounds (40, 40, 120, 120);
-    outputSlider.setBounds (180, 40, 120, 120);
-    modeBox.setBounds (320, 80, 120, 24);
+    driveSlider.setBounds (20, 40, 110, 110);
+    outputSlider.setBounds (140, 40, 110, 110);
+    mixSlider.setBounds (260, 40, 110, 110);
+    toneSlider.setBounds (380, 40, 110, 110);
+    modeBox.setBounds (20, 160, 140, 24);
+    softClipToggle.setBounds (180, 160, 160, 24);
+    meter.setBounds (20, 200, getWidth() - 40, 24);
+}
+
+void BoDSPDistortionAudioProcessorEditor::timerCallback()
+{
+    // Poll processor meter (atomic)
+    const float v = processorRef.getOutputMeter();
+    meter.setLevel (v);
 }

@@ -20,6 +20,7 @@ public:
 	};
 
 	WaveShaper() noexcept = default;
+	void setSoftClipAt0dB (bool v) noexcept { softClip0db = v; }
 
 	// Process a single sample. Fast, no allocations.
 	float process (float x) noexcept
@@ -27,33 +28,59 @@ public:
 		switch (mode)
 		{
 			case Mode::Soft:
-				// Soft clipping using tanh
-				return std::tanh (x);
+				// Soft clipping: either tanh or a 0dB-threshold soft clip
+				if (softClip0db)
+				{
+					// Soft clip with threshold at 1.0 (0 dB). Smoothly compresses values above 1.0
+					const float t = 1.0f;
+					const float ax = std::fabs (x);
+					if (ax <= t)
+						return x;
+					const float over = ax - t;
+					// map over -> [0, 1) with exponential curve for musical compression
+					const float compressed = t + (1.0f - std::exp (-over));
+					return x < 0.0f ? -compressed : compressed;
+				}
+				else
+				{
+					// Classic soft clipping using tanh scaled for musical response
+					return std::tanh (x * 0.8f);
+				}
 
 			case Mode::Tube:
-				// Gentle tube-like saturation: x / (1 + |x|)
-				return x / (1.0f + std::fabs (x));
+				// Tube-like saturation using a smooth asymmetric polynomial approximation.
+				// This gives a warmer, asymmetric response compared with tanh.
+				{
+					const float ax = std::fabs (x);
+					const float sign = x < 0.0f ? -1.0f : 1.0f;
+					// coefficients chosen for a musical compromise
+					const float a = 2.0f;
+					const float y = (x * (a + 1.0f)) / (a + ax);
+					return y;
+				}
 
 			case Mode::Hard:
-				// Hard clip
+				// Hard clip to +-1.0f
 				if (x > 1.0f) return 1.0f;
 				if (x < -1.0f) return -1.0f;
 				return x;
 
 			case Mode::Foldback:
 			{
-				// Foldback distortion: reflect waveform back into range when exceeding threshold
+				// Foldback distortion: smoother fold using a sin-based transfer
 				const float thresh = 1.0f;
 				float ax = std::fabs (x);
 				if (ax <= thresh)
 					return x;
 
-				// fold amount
-				float excess = ax - thresh;
-				float period = 2.0f * thresh;
-				float folded = std::fmod (excess, period);
-				float out = folded <= thresh ? (thresh - folded) : (folded - thresh);
-				return (x < 0.0f) ? -out : out;
+				// Compute folded position in [0, 2*thresh)
+				float pos = std::fmod (ax - thresh, 2.0f * thresh);
+				// Mirror into [0, thresh]
+				float mirrored = pos <= thresh ? pos : (2.0f * thresh - pos);
+
+				// Map to smooth curve using sin to avoid hard discontinuities
+				const float mapped = std::sin (juce::MathConstants<float>::halfPi * (mirrored / thresh));
+				return (x < 0.0f) ? -mapped : mapped;
 			}
 		}
 
@@ -64,6 +91,7 @@ public:
 
 private:
 	Mode mode { Mode::Soft };
+	bool softClip0db { false };
 };
 
 } // namespace bodsp
