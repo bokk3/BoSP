@@ -6,7 +6,7 @@ juce_add_plugin(BoDSPDistortion
     IS_MIDI_EFFECT FALSE
     EDITOR_WANTS_KEYBOARD_FOCUS FALSE
 
-    COPY_PLUGIN_AFTER_BUILD TRUE
+    COPY_PLUGIN_AFTER_BUILD FALSE
 
     PLUGIN_MANUFACTURER_CODE BoDS
     PLUGIN_CODE Dist
@@ -21,7 +21,7 @@ target_sources(BoDSPDistortion PRIVATE
     Source/PluginProcessor.h
     Source/PluginEditor.cpp
     Source/PluginEditor.h
-)
+ "Source/Parameters.h" "Source/Parameters.cpp")
 
 target_link_libraries(BoDSPDistortion PRIVATE
     juce::juce_audio_utils
@@ -30,4 +30,5 @@ target_link_libraries(BoDSPDistortion PRIVATE
 target_compile_definitions(BoDSPDistortion PRIVATE
     JUCE_WEB_BROWSER=0
     JUCE_USE_CURL=0
+    JUCE_VST3_CAN_REPLACE_VST2=0
 )

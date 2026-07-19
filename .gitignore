@@ -361,3 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Ignore local JUCE SDK folder (third-party external library)
+# Add the entire external/JUCE directory to avoid checking in the JUCE sources
+/external/JUCE/
