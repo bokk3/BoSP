@@ -7,3 +7,4 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_subdirectory(external/JUCE)
 add_subdirectory(plugins/Distortion)
+add_subdirectory(plugins/Delay)

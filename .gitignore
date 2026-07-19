@@ -365,3 +365,21 @@ FodyWeavers.xsd
 # Ignore local JUCE SDK folder (third-party external library)
 # Add the entire external/JUCE directory to avoid checking in the JUCE sources
 /external/JUCE/
+/build/
+/build.backup/
+
+# Additional build output and helper folders (JUCE / CMake helpers / artefacts)
+/vst3_helpers/
+/build/**/BoDSP*_*_artefacts/
+**/*_artefacts/
+
+# Common binary/object files produced by builds
+*.lib
+*.exp
+*.obj
+*.pdb
+*.ilk
+*.suo
+
+# Visual Studio generated installer/project artefacts
+*.vcxproj.user
