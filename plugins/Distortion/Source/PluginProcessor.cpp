@@ -255,9 +255,10 @@ void BoDSPDistortionAudioProcessor::processBlock (juce::AudioBuffer<float>& buff
             // last element in the chain prevents output exceeding 0 dBFS.
             if (lastSoftClip)
             {
-                // Use tanh normalization to softly clamp peaks to +/-1.0
-                const float t = std::tanh (finalOut);
-                finalOut = t * (1.0f / std::tanh (1.0f));
+                // Use tanh to softly limit the signal into [-1, 1]. Do NOT
+                // rescale by 1/tanh(1) — that can push values above 1 for
+                // large inputs. Plain tanh clamps to < 1.0.
+                finalOut = std::tanh (finalOut);
             }
 
             ptr[sample] = finalOut;
