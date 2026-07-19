@@ -29,8 +29,9 @@ Notes
 
 Project layout
 --------------
-- shared/DSP          Reusable DSP components (Gain, WaveShaper, etc.)
+- shared/DSP          Reusable DSP components (Gain, WaveShaper, DelayLine, etc.)
 - plugins/Distortion   Distortion plugin (processor + editor)
+- plugins/Delay        Delay plugin (processor + editor) — basic multifunctional delay (mono/stereo/ping-pong)
 - external/JUCE        JUCE SDK (kept out of source control)
 - tests/               Unit tests for shared DSP
 
