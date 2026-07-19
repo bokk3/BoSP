@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Boris\Documents\VSTDevelopment\BoSP\build\vst3_helpers\BoDSPDistortion\CMakeFiles\45a30ce3ffeddbb8a51c973dd4385874\generate.stamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{F6C86974-98FB-3F98-ACFD-FBA1951679E0}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,10 @@
+^C:\USERS\BORIS\DOCUMENTS\VSTDEVELOPMENT\BOSP\EXTERNAL\JUCE\EXTRAS\BUILD\JUCEAIDE\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/Boris/Documents/VSTDevelopment/BoSP/external/JUCE -BC:/Users/Boris/Documents/VSTDevelopment/BoSP/build/external/JUCE/tools --check-stamp-file C:/Users/Boris/Documents/VSTDevelopment/BoSP/build/external/JUCE/tools/extras/Build/juceaide/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

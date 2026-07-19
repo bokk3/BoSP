@@ -1,0 +1,15 @@
+C:/Users/Boris/Documents/VSTDevelopment/BoSP/build/CMakeFiles/INSTALL.dir
+C:/Users/Boris/Documents/VSTDevelopment/BoSP/build/CMakeFiles/ALL_BUILD.dir
+C:/Users/Boris/Documents/VSTDevelopment/BoSP/build/CMakeFiles/ZERO_CHECK.dir
+C:/Users/Boris/Documents/VSTDevelopment/BoSP/build/external/JUCE/CMakeFiles/INSTALL.dir
+C:/Users/Boris/Documents/VSTDevelopment/BoSP/build/external/JUCE/CMakeFiles/ALL_BUILD.dir
+C:/Users/Boris/Documents/VSTDevelopment/BoSP/build/external/JUCE/modules/CMakeFiles/INSTALL.dir
+C:/Users/Boris/Documents/VSTDevelopment/BoSP/build/external/JUCE/extras/Build/CMakeFiles/INSTALL.dir
+C:/Users/Boris/Documents/VSTDevelopment/BoSP/build/external/JUCE/extras/Build/juceaide/CMakeFiles/INSTALL.dir
+C:/Users/Boris/Documents/VSTDevelopment/BoSP/build/plugins/Distortion/CMakeFiles/BoDSPDistortion.dir
+C:/Users/Boris/Documents/VSTDevelopment/BoSP/build/plugins/Distortion/CMakeFiles/BoDSPDistortion_All.dir
+C:/Users/Boris/Documents/VSTDevelopment/BoSP/build/plugins/Distortion/CMakeFiles/BoDSPDistortion_Standalone.dir
+C:/Users/Boris/Documents/VSTDevelopment/BoSP/build/plugins/Distortion/CMakeFiles/BoDSPDistortion_rc_lib.dir
+C:/Users/Boris/Documents/VSTDevelopment/BoSP/build/plugins/Distortion/CMakeFiles/BoDSPDistortion_VST3.dir
+C:/Users/Boris/Documents/VSTDevelopment/BoSP/build/plugins/Distortion/CMakeFiles/BoDSPDistortion_vst3_helper.dir
+C:/Users/Boris/Documents/VSTDevelopment/BoSP/build/plugins/Distortion/CMakeFiles/INSTALL.dir

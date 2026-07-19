@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Boris\Documents\VSTDevelopment\BoSP\build\external\JUCE\tools\CMakeFiles\37fb592570e689eb9cb365771dbdd800\INSTALL_force.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{9C1F216A-35D4-3671-8E7C-D29249D31812}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

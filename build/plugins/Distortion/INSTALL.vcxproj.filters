@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Boris\Documents\VSTDevelopment\BoSP\build\CMakeFiles\05b76a16b10c39125b6792530626a78b\INSTALL_force.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{FFCE5C2D-5F3C-3B36-A6EE-6106483F5226}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

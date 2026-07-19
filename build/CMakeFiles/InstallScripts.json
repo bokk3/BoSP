@@ -1,0 +1,12 @@
+{
+	"InstallScripts" : 
+	[
+		"C:/Users/Boris/Documents/VSTDevelopment/BoSP/build/cmake_install.cmake",
+		"C:/Users/Boris/Documents/VSTDevelopment/BoSP/build/external/JUCE/cmake_install.cmake",
+		"C:/Users/Boris/Documents/VSTDevelopment/BoSP/build/external/JUCE/modules/cmake_install.cmake",
+		"C:/Users/Boris/Documents/VSTDevelopment/BoSP/build/external/JUCE/extras/Build/cmake_install.cmake",
+		"C:/Users/Boris/Documents/VSTDevelopment/BoSP/build/external/JUCE/extras/Build/juceaide/cmake_install.cmake",
+		"C:/Users/Boris/Documents/VSTDevelopment/BoSP/build/plugins/Distortion/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
