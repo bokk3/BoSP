@@ -20,7 +20,9 @@ static void setupKnob (juce::Slider& s, juce::Label& lbl,
 BoDSPFilterAudioProcessorEditor::BoDSPFilterAudioProcessorEditor (BoDSPFilterAudioProcessor& p)
 	: AudioProcessorEditor (&p), processorRef (p)
 {
-	setSize (420, 260);
+	setResizable (true, true);
+	setResizeLimits (420, 220, 1000, 600);
+	setSize (520, 260);
 
 	auto& apvts = processorRef.apvts;
 
@@ -83,15 +85,20 @@ void BoDSPFilterAudioProcessorEditor::paint (juce::Graphics& g)
 
 void BoDSPFilterAudioProcessorEditor::resized()
 {
-	// Mode box across the top-left
-	modeBox.setBounds (20, 62, 160, 26);
+	const int w = getWidth();
+	const int h = getHeight();
 
-	// Four knobs in a row to the right and below
-	const int knobW = 90;
-	const int knobH = 100;
+	// Mode box on the left, scales with sidebar width
+	const int sidebarW = juce::jlimit (120, 180, (int) (w * 0.3f));
+	modeBox.setBounds (20, 62, sidebarW, 26);
+
+	// Knobs in the remaining space
+	const int startX = 20 + sidebarW + 20;
+	const int contentW = w - startX - 20;
+	const int knobW = contentW / 4;
+	const int knobH = juce::jmin (100, h - 120);
 	const int labelH = 18;
 	const int knobY = 48;
-	const int startX = 210;
 
 	auto placeKnob = [&] (juce::Slider& s, juce::Label& lbl, int col)
 	{
@@ -106,7 +113,7 @@ void BoDSPFilterAudioProcessorEditor::resized()
 	placeKnob (mixSlider,  mixLabel,  3);
 
 	// Meter at the bottom
-	meter.setBounds (20, knobY + labelH + knobH + 16, getWidth() - 40, 22);
+	meter.setBounds (20, h - 42, w - 40, 22);
 }
 
 void BoDSPFilterAudioProcessorEditor::timerCallback()

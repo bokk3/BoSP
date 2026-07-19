@@ -4,6 +4,8 @@
 BoDSPDelayAudioProcessorEditor::BoDSPDelayAudioProcessorEditor (BoDSPDelayAudioProcessor& p)
 	: juce::AudioProcessorEditor (&p), processorRef (p)
 {
+	setResizable (true, true);
+	setResizeLimits (300, 200, 800, 600);
 	setSize (400, 240);
 
 	addAndMakeVisible (timeSlider);

@@ -8,7 +8,9 @@ BoDSPDistortionAudioProcessorEditor::BoDSPDistortionAudioProcessorEditor (BoDSPD
     juce::ignoreUnused (processorRef);
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
-    setSize (400, 300);
+    setResizable (true, true);
+    setResizeLimits (420, 260, 1000, 600);
+    setSize (520, 300);
 
     // Drive slider
     driveSlider.setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
@@ -81,15 +83,25 @@ void BoDSPDistortionAudioProcessorEditor::paint (juce::Graphics& g)
 
 void BoDSPDistortionAudioProcessorEditor::resized()
 {
-    // This is generally where you'll want to lay out the positions of any
-    // subcomponents in your editor..
-    driveSlider.setBounds (20, 40, 110, 110);
-    outputSlider.setBounds (140, 40, 110, 110);
-    mixSlider.setBounds (260, 40, 110, 110);
-    toneSlider.setBounds (380, 40, 110, 110);
-    modeBox.setBounds (20, 160, 140, 24);
-    softClipToggle.setBounds (180, 160, 160, 24);
-    meter.setBounds (20, 200, getWidth() - 40, 24);
+    const int w = getWidth();
+    const int h = getHeight();
+
+    // 4 knobs in a row
+    const int knobW = (w - 40) / 4;
+    const int knobH = juce::jmin (110, h - 160);
+    const int startX = 20;
+
+    driveSlider.setBounds (startX + 0 * knobW, 40, knobW, knobH);
+    outputSlider.setBounds (startX + 1 * knobW, 40, knobW, knobH);
+    mixSlider.setBounds (startX + 2 * knobW, 40, knobW, knobH);
+    toneSlider.setBounds (startX + 3 * knobW, 40, knobW, knobH);
+
+    // Mode box and toggle below the knobs
+    const int controlY = h - 90;
+    modeBox.setBounds (20, controlY, 140, 24);
+    softClipToggle.setBounds (180, controlY, 160, 24);
+
+    meter.setBounds (20, h - 44, w - 40, 24);
 }
 
 void BoDSPDistortionAudioProcessorEditor::timerCallback()

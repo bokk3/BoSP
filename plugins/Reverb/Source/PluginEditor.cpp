@@ -20,6 +20,8 @@ static void setupKnobStatic (juce::Slider& s, juce::Label& lbl, const juce::Stri
 BoDSPReverbAudioProcessorEditor::BoDSPReverbAudioProcessorEditor (BoDSPReverbAudioProcessor& p)
 	: AudioProcessorEditor (&p), processorRef (p)
 {
+	setResizable (true, true);
+	setResizeLimits (500, 220, 1200, 600);
 	setSize (560, 280);
 
 	auto& apvts = processorRef.apvts;
@@ -75,12 +77,15 @@ void BoDSPReverbAudioProcessorEditor::paint (juce::Graphics& g)
 
 void BoDSPReverbAudioProcessorEditor::resized()
 {
-	// Seven knobs in a row: columns of 80px each, centred in 560px
-	const int knobW = 80;
-	const int knobH = 100;
+	const int w = getWidth();
+	const int h = getHeight();
+
+	// Seven knobs in a row spread across the available width
+	const int knobW = (w - 40) / 7;
+	const int knobH = juce::jmin (100, h - 120);
 	const int labelH = 18;
 	const int rowY = 48;
-	const int startX = 0;
+	const int startX = 20;
 
 	auto placeKnob = [&] (juce::Slider& s, juce::Label& lbl, int col)
 	{
@@ -97,7 +102,7 @@ void BoDSPReverbAudioProcessorEditor::resized()
 	placeKnob (lpSlider,       lpLabel,       5);
 	placeKnob (hpSlider,       hpLabel,       6);
 
-	meter.setBounds (20, rowY + labelH + knobH + 16, getWidth() - 40, 22);
+	meter.setBounds (20, h - 42, w - 40, 22);
 }
 
 void BoDSPReverbAudioProcessorEditor::timerCallback()
