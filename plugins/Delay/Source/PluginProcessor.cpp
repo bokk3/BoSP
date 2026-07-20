@@ -31,6 +31,9 @@ void BoDSPDelayAudioProcessor::prepareToPlay (double sampleRate, int /*samplesPe
 	inputGain.prepare (sampleRate);
 	outputGain.prepare (sampleRate);
 	delay.prepare (sampleRate, numCh, 5.0f);
+	softClipper.prepare (sampleRate);
+	softClipper.setMode (bodsp::SoftClipper::ClipMode::Tanh);
+	meter.prepare (sampleRate);
 
 	if (auto* p = apvts.getRawParameterValue ("timeMs"))
 		delay.setTimeMs (p->load());
@@ -94,7 +97,6 @@ void BoDSPDelayAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
 	for (int ch = 0; ch < totalNumInputChannels; ++ch)
 		inputGain.process (buffer.getWritePointer (ch), numSamples);
 
-	float peak = 0.0f;
 
 	// Update parameters that may change per-block
 	if (auto* m = apvts.getRawParameterValue ("mix"))
@@ -126,13 +128,13 @@ void BoDSPDelayAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
 			const float dry = ptr[n];
 			float processed = delay.processSample (ch, dry, inLevel);
 			if (clip)
-				processed = std::tanh (processed);
+				processed = softClipper.processSample (processed);
 			ptr[n] = processed;
-			peak = std::max (peak, std::fabs (processed));
+			meter.processSample (processed);
 		}
 	}
 
-	outputMeter.store (peak);
+	outputMeter.store (meter.getPeak());
 }
 
 void BoDSPDelayAudioProcessor::getStateInformation (juce::MemoryBlock& destData)

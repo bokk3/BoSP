@@ -28,6 +28,9 @@ void BoDSPReverbAudioProcessor::prepareToPlay (double sampleRate, int /*samplesP
 {
 	const int numCh = static_cast<int> (getTotalNumInputChannels());
 	reverb.prepare (sampleRate, numCh);
+	softClipper.prepare (sampleRate);
+	softClipper.setMode (bodsp::SoftClipper::ClipMode::Tanh);
+	meter.prepare (sampleRate);
 
 	// Apply initial parameter values
 	if (auto* p = apvts.getRawParameterValue ("roomSize"))  reverb.setRoomSize (p->load());
@@ -82,7 +85,11 @@ void BoDSPReverbAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
 	float* ptrL = buffer.getWritePointer (0);
 	float* ptrR = (totalNumInputChannels > 1) ? buffer.getWritePointer (1) : nullptr;
 
-	float peak = 0.0f;
+	// Output gain (dB → linear)
+	float outputGain = 1.0f;
+	if (auto* p = apvts.getRawParameterValue ("outputGain"))
+		outputGain = juce::Decibels::decibelsToGain (p->load());
+
 	bool clip = false;
 	if (auto* p = apvts.getRawParameterValue ("softClip"))
 		clip = p->load() > 0.5f;
@@ -96,20 +103,25 @@ void BoDSPReverbAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
 		float outR = 0.0f;
 		reverb.processSample (inL, inR, outL, outR);
 
+		// Apply output gain
+		outL *= outputGain;
+		outR *= outputGain;
+
 		if (clip)
 		{
-			outL = std::tanh (outL);
-			outR = std::tanh (outR);
+			outL = softClipper.processSample (outL);
+			outR = softClipper.processSample (outR);
 		}
 
 		ptrL[n] = outL;
 		if (ptrR != nullptr)
 			ptrR[n] = outR;
 
-		peak = std::max (peak, std::max (std::fabs (outL), std::fabs (outR)));
+		meter.processSample (outL);
+		meter.processSample (outR);
 	}
 
-	outputMeter.store (peak);
+	outputMeter.store (meter.getPeak());
 }
 
 void BoDSPReverbAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
@@ -153,6 +165,10 @@ juce::AudioProcessorValueTreeState::ParameterLayout BoDSPReverbAudioProcessor::c
 	params.push_back (std::make_unique<juce::AudioParameterFloat> (
 		"hpCutoff", "HP Cutoff",
 		juce::NormalisableRange<float> (10.0f, 1000.0f, 1.0f, 0.5f), 20.0f));
+
+	params.push_back (std::make_unique<juce::AudioParameterFloat> (
+		"outputGain", "Output Gain (dB)",
+		juce::NormalisableRange<float> (-12.0f, 12.0f, 0.1f), 0.0f));
 
 	params.push_back (std::make_unique<juce::AudioParameterBool> (
 		"softClip", "Clipper", false));

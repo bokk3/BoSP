@@ -32,3 +32,6 @@ target_compile_definitions(BoDSPReverb PRIVATE
 	JUCE_USE_CURL=0
 	JUCE_VST3_CAN_REPLACE_VST2=0
 )
+
+bodsp_setup_release_copy(BoDSPReverb "BoDSP Reverb")
+

@@ -29,6 +29,10 @@ void BoDSPFilterAudioProcessor::prepareToPlay (double sampleRate, int /*samplesP
 {
 	const int numCh = static_cast<int> (getTotalNumInputChannels());
 	filter.prepare (sampleRate, numCh);
+	dryWet.prepare (sampleRate);
+	softClipper.prepare (sampleRate);
+	softClipper.setMode (bodsp::SoftClipper::ClipMode::Tanh);
+	meter.prepare (sampleRate);
 
 	if (auto* p = apvts.getRawParameterValue ("mode"))
 	{
@@ -86,11 +90,9 @@ void BoDSPFilterAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 	if (auto* p = apvts.getRawParameterValue ("q"))      filter.setQ (p->load());
 	if (auto* p = apvts.getRawParameterValue ("gainDb")) filter.setGainDb (p->load());
 
-	// Get mix parameter
-	float mix = 1.0f;
-	if (auto* p = apvts.getRawParameterValue ("mix")) mix = p->load();
+	// Update dry/wet mix
+	if (auto* p = apvts.getRawParameterValue ("mix")) dryWet.setMix (p->load());
 
-	float peak = 0.0f;
 	bool clip = false;
 	if (auto* p = apvts.getRawParameterValue ("softClip"))
 		clip = p->load() > 0.5f;
@@ -102,15 +104,15 @@ void BoDSPFilterAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 		{
 			const float dry = ptr[n];
 			const float wet = filter.processSample (ch, dry);
-			float out = dry * (1.0f - mix) + wet * mix;
+			float out = dryWet.process (dry, wet);
 			if (clip)
-				out = std::tanh (out);
+				out = softClipper.processSample (out);
 			ptr[n] = out;
-			peak = std::max (peak, std::fabs (out));
+			meter.processSample (out);
 		}
 	}
 
-	outputMeter.store (peak);
+	outputMeter.store (meter.getPeak());
 }
 
 //==============================================================================

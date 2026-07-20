@@ -1,4 +1,4 @@
-juce_add_plugin(BoDSPFilter
+juce_add_plugin(BoDSPChorus
 	COMPANY_NAME "BoDSP"
 	IS_SYNTH FALSE
 	NEEDS_MIDI_INPUT FALSE
@@ -9,29 +9,29 @@ juce_add_plugin(BoDSPFilter
 	COPY_PLUGIN_AFTER_BUILD FALSE
 
 	PLUGIN_MANUFACTURER_CODE BoDS
-	PLUGIN_CODE Filt
+	PLUGIN_CODE Chrs
 
 	FORMATS VST3 Standalone
 
-	PRODUCT_NAME "BoDSP Filter"
+	PRODUCT_NAME "BoDSP Chorus"
 )
 
-target_sources(BoDSPFilter PRIVATE
+target_sources(BoDSPChorus PRIVATE
 	Source/PluginProcessor.cpp
 	Source/PluginProcessor.h
 	Source/PluginEditor.cpp
 	Source/PluginEditor.h
 )
 
-target_link_libraries(BoDSPFilter PRIVATE
+target_link_libraries(BoDSPChorus PRIVATE
 	juce::juce_audio_utils
 )
 
-target_compile_definitions(BoDSPFilter PRIVATE
+target_compile_definitions(BoDSPChorus PRIVATE
 	JUCE_WEB_BROWSER=0
 	JUCE_USE_CURL=0
 	JUCE_VST3_CAN_REPLACE_VST2=0
 )
 
-bodsp_setup_release_copy(BoDSPFilter "BoDSP Filter")
+bodsp_setup_release_copy(BoDSPChorus "BoDSP Chorus")
 

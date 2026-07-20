@@ -383,3 +383,6 @@ FodyWeavers.xsd
 
 # Visual Studio generated installer/project artefacts
 *.vcxproj.user
+
+# Local release directory for build outputs
+/release_bin/

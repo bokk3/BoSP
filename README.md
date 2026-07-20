@@ -1,49 +1,149 @@
-# BoSP
+# BoDSP
 
-BoSP is a collection of professional audio plugins and a shared DSP library built with JUCE and CMake.
+> **A collection of professional VST3 audio plugins and a shared C++20 DSP framework — built with JUCE and CMake.**
 
-Purpose
--------
-This repository provides a clean, reusable architecture for building high-quality VST3 plugins. The codebase favors modern C++ (C++20), testability, and a strict separation between DSP and GUI.
+---
 
-Quick start (Windows / MSVC)
------------------------------
-1. Ensure prerequisites: Visual Studio (C++), CMake 3.22+, JUCE in external/JUCE
-2. Configure (from repository root):
+## Plugins
 
-   cmake -S . -B build
+| Plugin | Description | Key DSP |
+|--------|-------------|---------|
+| 🔥 **Distortion** | Waveshaper saturation — Soft / Tube / Hard / Fold modes | `WaveShaper`, `Tone`, `DryWet`, `SoftClipper` |
+| 🌊 **Delay** | Multitap stereo delay with auto-ducking, LP/HP filtering | `Delay`, `DelayLine`, `EnvelopeFollower` |
+| 🌌 **Reverb** | Freeverb-based stereo reverb with pre-delay and tone shaping | `Reverb`, `OnePoleFilters` |
+| 🎛️ **Filter** | Biquad filter — Lowpass, Highpass, Low/High Shelf, Notch | `BiquadFilter`, `DryWet` |
+| 🌀 **Chorus** | 4-voice stereo modulated delay with spread and feedback | `LFO`, `DelayLine`, `DryWet`, `ParameterSmoother` |
 
-   This will generate the build system for your default generator (Visual Studio on Windows). If you prefer Ninja you can pass -G "Ninja".
+All plugins ship as **VST3 + Standalone** and share a unified Hard Techno GUI:
+dark industrial gradients, neon orange-red rotary knobs, per-plugin VU meters, and a soft-clipper safety toggle.
 
-3. Build the Debug configuration (from repository root):
+---
 
-   cmake --build build --config Debug
+## Shared DSP Framework (`shared/DSP/`)
 
-Notes
-- To build a different configuration, replace Debug with Release.
-- To build a specific plugin target (e.g., only the Distortion plugin) you can append --target <target-name>. Example:
+The framework is the backbone. All modules are **C++20, JUCE-free, header-only, and realtime-safe** — no heap allocations inside `process()`.
 
-  cmake --build build --config Debug --target BoDSPDistortion_VST3
+### Foundation Libraries
 
- - The built .vst3 artifact is typically placed under build/plugins/Distortion/BoDSPDistortion_artefacts/<Config>/
+| File | Description |
+|------|-------------|
+| `Gain.h` | Linear gain stage |
+| `WaveShaper.h` | Soft / Tube / Hard / Fold waveshaping |
+| `Tone.h` | One-pole LP tone control |
+| `DelayLine.h` | Interpolated circular buffer |
+| `Delay.h` | Full delay with LP/HP filters and auto-duck |
+| `Reverb.h` | Freeverb-style stereo reverb |
+| `BiquadFilter.h` | Multi-mode biquad filter |
+| `OnePoleFilters.h` | Lightweight one-pole LP/HP |
 
-Project layout
---------------
-- shared/DSP          Reusable DSP components (Gain, WaveShaper, DelayLine, etc.)
-- plugins/Distortion   Distortion plugin (processor + editor)
-- plugins/Delay        Delay plugin (processor + editor) — basic multifunctional delay (mono/stereo/ping-pong)
-- external/JUCE        JUCE SDK (kept out of source control)
-- tests/               Unit tests for shared DSP
+### New DSP Modules
 
-Guiding principles
--------------------
-- DSP is independent from GUI and contains no JUCE GUI headers.
-- No allocations, locks, or file I/O inside the audio thread.
-- Prefer composition and single-responsibility components in shared/DSP.
-- Parameter IDs are stable once released. Use juce::AudioProcessorValueTreeState.
+| File | Description |
+|------|-------------|
+| `DryWet.h` | Equal-power or linear dry/wet blend |
+| `ParameterSmoother.h` | Linear ramp or exponential parameter smoothing |
+| `EnvelopeFollower.h` | Peak/RMS ballistics (attack/release) |
+| `LFO.h` | Sine / Triangle / Saw / Square / S&H |
+| `DCBlocker.h` | One-pole DC removal, multi-channel |
+| `SoftClipper.h` | Tanh / Atan / Cubic / SoftKnee saturation |
+| `NoiseGenerator.h` | White and pink noise (Kellett approximation) |
+| `Meter.h` | Peak, windowed RMS, peak hold, clip detect |
+| `StereoTools.h` | Width, mono, swap, M/S encode/decode |
+| `Oversampler.h` | 2x/4x oversampling with FIR extension points |
 
-Where to go next
------------------
-- See PROJECT_AGENT_GUIDE.md for automation/agent instructions.
-- See DEVELOPMENT_PLAN.md and ROADMAP.md for milestones and priorities.
+See [`progress-dsp.md`](progress-dsp.md) for the full status, API cheatsheet, and roadmap.
 
+---
+
+## Quick Start (Windows / MSVC)
+
+### Prerequisites
+- **Visual Studio** with C++ workload (MSVC 2022 recommended)
+- **CMake** 3.22+
+- **JUCE** cloned or extracted into `external/JUCE`
+
+### 1 — Configure
+```powershell
+cmake -S . -B build
+```
+> For Ninja: `cmake -S . -B build -G "Ninja"`
+
+### 2 — Build (Debug)
+```powershell
+cmake --build build --config Debug
+```
+
+### 3 — Build (Release)
+```powershell
+cmake --build build --config Release
+```
+
+### Build a single plugin
+```powershell
+cmake --build build --config Release --target BoDSPChorus_VST3
+```
+
+### Output locations
+```
+build/plugins/<PluginName>/<PluginName>_artefacts/<Config>/VST3/
+```
+
+---
+
+## Project Layout
+
+```
+BoSP/
+├── shared/
+│   └── DSP/                  Reusable C++20 DSP headers (JUCE-free)
+├── plugins/
+│   ├── Distortion/           Waveshaper saturation plugin
+│   ├── Delay/                Stereo delay with ducking
+│   ├── Reverb/               Freeverb reverb plugin
+│   ├── Filter/               Biquad filter plugin
+│   └── Chorus/               4-voice stereo chorus plugin
+├── tests/                    Unit tests for shared DSP
+├── external/
+│   └── JUCE/                 JUCE SDK (not in source control)
+├── CMakeLists.txt
+├── progress-dsp.md           DSP framework status and roadmap
+└── README.md
+```
+
+---
+
+## Architecture & Guiding Principles
+
+- **DSP is independent from GUI** — no JUCE GUI headers in `shared/DSP/`
+- **Realtime-safe** — no allocations, locks, or file I/O in `process()` / `processBlock()`
+- **Composition over inheritance** — small, single-responsibility DSP classes in `shared/DSP/`
+- **Consistent API** — every class exposes `prepare(sampleRate)`, `reset()`, and a `processSample()` or `process()` method
+- **Namespace** — all shared DSP lives in `namespace bodsp`
+- **Stable parameter IDs** — once shipped, parameter IDs do not change (APVTS-backed presets)
+- **C++20** — `std::numbers::pi_v`, `std::clamp`, concepts-ready
+
+---
+
+## Roadmap
+
+| Plugin / Module | Status |
+|-----------------|--------|
+| Distortion | ✅ Done |
+| Delay | ✅ Done |
+| Reverb | ✅ Done |
+| Filter | ✅ Done |
+| Chorus | ✅ Done |
+| Compressor | 🔜 Planned (`EnvelopeFollower` ready) |
+| Phaser | 🔜 Planned (`LFO` + all-pass chain) |
+| Granular | 🔜 Planned |
+| Oversampler FIR upgrade | 🔜 Planned |
+| Preset system | 🔜 Planned |
+
+---
+
+## References
+
+- [JUCE](https://juce.com/) — audio plugin framework
+- [Freeverb](https://ccrma.stanford.edu/~jos/pasp/Freeverb.html) — reverb algorithm
+- [Paul Kellett pink noise](http://www.firstpr.com.au/dsp/pink-noise/) — pink noise approximation
+- [RBJ Audio Cookbook](https://webaudio.github.io/Audio-EQ-Cookbook/audio-eq-cookbook.html) — biquad filter design

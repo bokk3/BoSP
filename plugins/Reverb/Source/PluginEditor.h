@@ -23,15 +23,15 @@ private:
 
 	// --- Sliders ---
 	juce::Slider roomSizeSlider, dampingSlider, widthSlider,
-	             mixSlider, preDelaySlider, lpSlider, hpSlider;
+	             mixSlider, preDelaySlider, lpSlider, hpSlider, outputGainSlider;
 
 	using Attach = juce::AudioProcessorValueTreeState::SliderAttachment;
 	std::unique_ptr<Attach> roomSizeAttach, dampingAttach, widthAttach,
-	                        mixAttach, preDelayAttach, lpAttach, hpAttach;
+	                        mixAttach, preDelayAttach, lpAttach, hpAttach, outputGainAttach;
 
 	// --- Labels ---
 	juce::Label roomSizeLabel, dampingLabel, widthLabel,
-	            mixLabel, preDelayLabel, lpLabel, hpLabel;
+	            mixLabel, preDelayLabel, lpLabel, hpLabel, outputGainLabel;
 
 	// --- Toggles ---
 	juce::ToggleButton clipToggle { "Clipper" };
