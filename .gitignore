@@ -386,3 +386,4 @@ FodyWeavers.xsd
 
 # Local release directory for build outputs
 /release_bin/
+/debug_bin/
