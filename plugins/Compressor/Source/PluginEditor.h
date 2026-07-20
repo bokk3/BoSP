@@ -5,10 +5,10 @@
 
 //==============================================================================
 /** Hard Techno-styled VU meter component (mirrors other BoDSP plugins). */
-class ChorusMeterComponent : public juce::Component, private juce::Timer
+class CompressorMeterComponent : public juce::Component, private juce::Timer
 {
 public:
-    explicit ChorusMeterComponent (BoDSPChorusAudioProcessor& p) : processor (p)
+    explicit CompressorMeterComponent (BoDSPCompressorAudioProcessor& p) : processor (p)
     {
         startTimerHz (30);
     }
@@ -39,39 +39,39 @@ public:
     void timerCallback() override { repaint(); }
 
 private:
-    BoDSPChorusAudioProcessor& processor;
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChorusMeterComponent)
+    BoDSPCompressorAudioProcessor& processor;
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CompressorMeterComponent)
 };
 
 //==============================================================================
-class BoDSPChorusAudioProcessorEditor : public juce::AudioProcessorEditor
+class BoDSPCompressorAudioProcessorEditor : public juce::AudioProcessorEditor
 {
 public:
-    explicit BoDSPChorusAudioProcessorEditor (BoDSPChorusAudioProcessor&);
-    ~BoDSPChorusAudioProcessorEditor() override;
+    explicit BoDSPCompressorAudioProcessorEditor (BoDSPCompressorAudioProcessor&);
+    ~BoDSPCompressorAudioProcessorEditor() override;
 
     void paint (juce::Graphics&) override;
     void resized() override;
 
 private:
-    BoDSPChorusAudioProcessor& audioProcessor;
+    BoDSPCompressorAudioProcessor& audioProcessor;
 
     // Knobs
-    juce::Slider rateKnob, depthKnob, mixKnob, feedbackKnob, spreadKnob, outputGainKnob;
+    juce::Slider thresholdKnob, ratioKnob, attackKnob, releaseKnob, makeupKnob, mixKnob;
     // Labels
-    juce::Label rateLabel, depthLabel, mixLabel, feedbackLabel, spreadLabel, outputGainLabel;
+    juce::Label thresholdLabel, ratioLabel, attackLabel, releaseLabel, makeupLabel, mixLabel;
     // Soft clip toggle
     juce::ToggleButton clipperToggle { "CLIP" };
     // VU meter
-    ChorusMeterComponent vuMeter;
+    CompressorMeterComponent vuMeter;
 
     // Attachments
     using SliderAttachment = juce::AudioProcessorValueTreeState::SliderAttachment;
     using ButtonAttachment = juce::AudioProcessorValueTreeState::ButtonAttachment;
-    SliderAttachment rateAtt, depthAtt, mixAtt, feedbackAtt, spreadAtt, outputGainAtt;
+    SliderAttachment thresholdAtt, ratioAtt, attackAtt, releaseAtt, makeupAtt, mixAtt;
     ButtonAttachment clipperAtt;
 
     void setupKnob (juce::Slider& s, juce::Label& l, const juce::String& text);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BoDSPChorusAudioProcessorEditor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BoDSPCompressorAudioProcessorEditor)
 };

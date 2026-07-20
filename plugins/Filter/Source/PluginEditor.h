@@ -27,12 +27,12 @@ private:
 	std::unique_ptr<ModeAttach> modeAttach;
 
 	// Knobs
-	juce::Slider freqSlider, qSlider, gainSlider, mixSlider;
+	juce::Slider freqSlider, qSlider, gainSlider, mixSlider, outputGainSlider;
 	using Attach = juce::AudioProcessorValueTreeState::SliderAttachment;
-	std::unique_ptr<Attach> freqAttach, qAttach, gainAttach, mixAttach;
+	std::unique_ptr<Attach> freqAttach, qAttach, gainAttach, mixAttach, outputGainAttach;
 
 	// Labels
-	juce::Label freqLabel, qLabel, gainLabel, mixLabel;
+	juce::Label freqLabel, qLabel, gainLabel, mixLabel, outputGainLabel;
 
 	// Toggles
 	juce::ToggleButton clipToggle { "Clipper" };

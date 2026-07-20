@@ -22,13 +22,13 @@ private:
 	BoDSPDelayAudioProcessor& processorRef;
 
 	// --- Knobs ---
-	juce::Slider timeSlider, feedbackSlider, mixSlider, lpSlider, hpSlider;
+	juce::Slider timeSlider, feedbackSlider, mixSlider, lpSlider, hpSlider, outputGainSlider;
 
 	using Attach = juce::AudioProcessorValueTreeState::SliderAttachment;
-	std::unique_ptr<Attach> timeAttach, feedbackAttach, mixAttach, lpAttach, hpAttach;
+	std::unique_ptr<Attach> timeAttach, feedbackAttach, mixAttach, lpAttach, hpAttach, outputGainAttach;
 
 	// --- Labels ---
-	juce::Label timeLabel, feedbackLabel, mixLabel, lpLabel, hpLabel;
+	juce::Label timeLabel, feedbackLabel, mixLabel, lpLabel, hpLabel, outputGainLabel;
 
 	// --- Toggles ---
 	juce::ToggleButton duckToggle { "Auto Duck" };

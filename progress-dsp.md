@@ -129,26 +129,26 @@ os.downsample(output, numSamples);
 
 ## Plugin DSP Module Usage
 
-| Module | Distortion | Delay | Reverb | Filter | Chorus |
-|--------|:---:|:---:|:---:|:---:|:---:|
-| Gain | ✅ | ✅ | — | — | — |
-| WaveShaper | ✅ | — | — | — | — |
-| Tone | ✅ | — | — | — | — |
-| Delay | — | ✅ | — | — | — |
-| DelayLine | — | (internal) | — | — | ✅ |
-| Reverb | — | — | ✅ | — | — |
-| BiquadFilter | — | (internal) | (internal) | ✅ | — |
-| OnePoleFilters | — | (internal) | (internal) | — | — |
-| DryWet | ✅ | — | — | ✅ | ✅ |
-| ParameterSmoother | ✅ | — | — | — | ✅ |
-| EnvelopeFollower | — | (internal) | — | — | — |
-| LFO | — | — | — | — | ✅ |
-| DCBlocker | — | — | — | — | — |
-| SoftClipper | ✅ | ✅ | ✅ | ✅ | ✅ |
-| NoiseGenerator | — | — | — | — | — |
-| Meter | ✅ | ✅ | ✅ | ✅ | ✅ |
-| StereoTools | — | — | — | — | — |
-| Oversampler | — | — | — | — | — |
+| Module | Distortion | Delay | Reverb | Filter | Chorus | Compressor |
+|--------|:---:|:---:|:---:|:---:|:---:|:---:|
+| Gain | ✅ | ✅ | — | — | — | ✅ |
+| WaveShaper | ✅ | — | — | — | — | — |
+| Tone | ✅ | — | — | — | — | — |
+| Delay | — | ✅ | — | — | — | — |
+| DelayLine | — | (internal) | — | — | ✅ | — |
+| Reverb | — | — | ✅ | — | — | — |
+| BiquadFilter | — | (internal) | (internal) | ✅ | — | — |
+| OnePoleFilters | — | (internal) | (internal) | — | — | — |
+| DryWet | ✅ | — | — | ✅ | ✅ | ✅ |
+| ParameterSmoother | ✅ | — | — | — | ✅ | ✅ |
+| EnvelopeFollower | — | (internal) | — | — | — | ✅ |
+| LFO | — | — | — | — | ✅ | — |
+| DCBlocker | — | — | — | — | — | — |
+| SoftClipper | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| NoiseGenerator | — | — | — | — | — | — |
+| Meter | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| StereoTools | — | — | — | — | — | — |
+| Oversampler | — | — | — | — | — | — |
 
 ---
 
@@ -156,6 +156,7 @@ os.downsample(output, numSamples);
 
 - [ ] Write unit tests for each new DSP module in `tests/`
 - [ ] Upgrade `Oversampler` with polyphase half-band FIR filters
-- [ ] Implement `Compressor.h` (builds on `EnvelopeFollower`)
-- [ ] Implement `Phaser.h` (builds on `LFO` + all-pass chain)
-- [ ] Implement `Granular.h`
+- [x] Implement `Compressor` plugin (uses `EnvelopeFollower`, `ParameterSmoother`, `Meter`, `Gain`)
+- [ ] Implement `Phaser` plugin (uses `LFO` + all-pass chain)
+- [ ] Implement `Granular` plugin
+

@@ -13,6 +13,8 @@
 | 🌌 **Reverb** | Freeverb-based stereo reverb with pre-delay and tone shaping | `Reverb`, `OnePoleFilters` |
 | 🎛️ **Filter** | Biquad filter — Lowpass, Highpass, Low/High Shelf, Notch | `BiquadFilter`, `DryWet` |
 | 🌀 **Chorus** | 4-voice stereo modulated delay with spread and feedback | `LFO`, `DelayLine`, `DryWet`, `ParameterSmoother` |
+| 📉 **Compressor** | Stereo feedforward dynamics with ratio, threshold, ballistics | `EnvelopeFollower`, `ParameterSmoother`, `Meter`, `Gain` |
+
 
 All plugins ship as **VST3 + Standalone** and share a unified Hard Techno GUI:
 dark industrial gradients, neon orange-red rotary knobs, per-plugin VU meters, and a soft-clipper safety toggle.
@@ -133,7 +135,7 @@ BoSP/
 | Reverb | ✅ Done |
 | Filter | ✅ Done |
 | Chorus | ✅ Done |
-| Compressor | 🔜 Planned (`EnvelopeFollower` ready) |
+| Compressor | ✅ Done |
 | Phaser | 🔜 Planned (`LFO` + all-pass chain) |
 | Granular | 🔜 Planned |
 | Oversampler FIR upgrade | 🔜 Planned |

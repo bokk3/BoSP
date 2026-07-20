@@ -67,6 +67,11 @@ BoDSPFilterAudioProcessorEditor::BoDSPFilterAudioProcessorEditor (BoDSPFilterAud
 	setupTechnoKnob (mixSlider, mixLabel, "Mix", this);
 	mixAttach = std::make_unique<Attach> (apvts, "mix", mixSlider);
 
+	setupTechnoKnob (outputGainSlider, outputGainLabel, "Output", this);
+	outputGainSlider.setTextValueSuffix (" dB");
+	outputGainAttach = std::make_unique<Attach> (apvts, "outputGain", outputGainSlider);
+
+
 	// Clipper Toggle
 	setupTechnoToggle (clipToggle, this);
 	clipAttach = std::make_unique<ButtonAttach> (apvts, "softClip", clipToggle);
@@ -119,7 +124,7 @@ void BoDSPFilterAudioProcessorEditor::resized()
 	// Knobs in the remaining space
 	const int startX = 20 + sidebarW + 20;
 	const int contentW = w - startX - 20;
-	const int knobW = contentW / 4;
+	const int knobW = contentW / 5;
 	const int knobH = juce::jmin (100, h - 120);
 	const int labelH = 18;
 	const int knobY = 48;
@@ -131,10 +136,11 @@ void BoDSPFilterAudioProcessorEditor::resized()
 		s.setBounds (x, knobY + labelH, knobW, knobH);
 	};
 
-	placeKnob (freqSlider, freqLabel, 0);
-	placeKnob (qSlider,    qLabel,    1);
-	placeKnob (gainSlider, gainLabel, 2);
-	placeKnob (mixSlider,  mixLabel,  3);
+	placeKnob (freqSlider,       freqLabel,       0);
+	placeKnob (qSlider,          qLabel,          1);
+	placeKnob (gainSlider,       gainLabel,       2);
+	placeKnob (mixSlider,        mixLabel,        3);
+	placeKnob (outputGainSlider, outputGainLabel, 4);
 
 	// Meter at the bottom
 	meter.setBounds (20, h - 42, w - 40, 22);

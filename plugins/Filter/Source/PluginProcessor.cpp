@@ -34,6 +34,10 @@ void BoDSPFilterAudioProcessor::prepareToPlay (double sampleRate, int /*samplesP
 	softClipper.setMode (bodsp::SoftClipper::ClipMode::Tanh);
 	meter.prepare (sampleRate);
 
+	outputGainSmoothed.prepare (sampleRate);
+	outputGainSmoothed.setMode (bodsp::ParameterSmoother::SmootherMode::Exponential);
+	outputGainSmoothed.setTimeConstant (20.0f);
+
 	if (auto* p = apvts.getRawParameterValue ("mode"))
 	{
 		lastModeIndex = static_cast<int> (p->load());
@@ -42,6 +46,8 @@ void BoDSPFilterAudioProcessor::prepareToPlay (double sampleRate, int /*samplesP
 	if (auto* p = apvts.getRawParameterValue ("freq"))   filter.setFrequency (p->load());
 	if (auto* p = apvts.getRawParameterValue ("q"))      filter.setQ (p->load());
 	if (auto* p = apvts.getRawParameterValue ("gainDb")) filter.setGainDb (p->load());
+	if (auto* p = apvts.getRawParameterValue ("outputGain"))
+		outputGainSmoothed.reset (juce::Decibels::decibelsToGain (p->load()));
 }
 
 void BoDSPFilterAudioProcessor::releaseResources() {}
@@ -93,18 +99,22 @@ void BoDSPFilterAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 	// Update dry/wet mix
 	if (auto* p = apvts.getRawParameterValue ("mix")) dryWet.setMix (p->load());
 
+	if (auto* p = apvts.getRawParameterValue ("outputGain"))
+		outputGainSmoothed.setTarget (juce::Decibels::decibelsToGain (p->load()));
+
 	bool clip = false;
 	if (auto* p = apvts.getRawParameterValue ("softClip"))
 		clip = p->load() > 0.5f;
 
-	for (int ch = 0; ch < totalNumInputChannels; ++ch)
+	for (int n = 0; n < numSamples; ++n)
 	{
-		float* ptr = buffer.getWritePointer (ch);
-		for (int n = 0; n < numSamples; ++n)
+		const float outG = outputGainSmoothed.getNextValue();
+		for (int ch = 0; ch < totalNumInputChannels; ++ch)
 		{
+			float* ptr = buffer.getWritePointer (ch);
 			const float dry = ptr[n];
 			const float wet = filter.processSample (ch, dry);
-			float out = dryWet.process (dry, wet);
+			float out = dryWet.process (dry, wet) * outG;
 			if (clip)
 				out = softClipper.processSample (out);
 			ptr[n] = out;
@@ -112,7 +122,7 @@ void BoDSPFilterAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 		}
 	}
 
-	outputMeter.store (meter.getPeak());
+	outputMeter.store (meter.getPeakHold());
 }
 
 //==============================================================================
@@ -161,6 +171,11 @@ BoDSPFilterAudioProcessor::createParameterLayout()
 		"mix", "Mix",
 		juce::NormalisableRange<float> (0.0f, 1.0f),
 		1.0f));
+
+	params.push_back (std::make_unique<juce::AudioParameterFloat> (
+		"outputGain", "Output Gain (dB)",
+		juce::NormalisableRange<float> (-24.0f, 24.0f, 0.1f),
+		0.0f));
 
 	params.push_back (std::make_unique<juce::AudioParameterBool> (
 		"softClip", "Clipper", false));
