@@ -58,6 +58,10 @@ BoDSPDelayAudioProcessorEditor::BoDSPDelayAudioProcessorEditor (BoDSPDelayAudioP
 	hpSlider.setSkewFactorFromMidPoint (150.0);
 	hpAttach = std::make_unique<Attach> (apvts, "hp", hpSlider);
 
+	setupTechnoKnob (outputGainSlider, outputGainLabel, "Output", this);
+	outputGainSlider.setTextValueSuffix (" dB");
+	outputGainAttach = std::make_unique<Attach> (apvts, "outputGain", outputGainSlider);
+
 	// Toggles
 	setupTechnoToggle (duckToggle, this);
 	duckAttach = std::make_unique<ButtonAttach> (apvts, "duckEnable", duckToggle);
@@ -108,7 +112,7 @@ void BoDSPDelayAudioProcessorEditor::resized()
 	// Knobs on the right
 	const int startX = 20 + sidebarW + 20;
 	const int contentW = w - startX - 20;
-	const int knobW = contentW / 5;
+	const int knobW = contentW / 6;
 	const int knobH = juce::jmin (100, h - 120);
 	const int labelH = 18;
 	const int knobY = 48;
@@ -120,11 +124,12 @@ void BoDSPDelayAudioProcessorEditor::resized()
 		s.setBounds (x, knobY + labelH, knobW, knobH);
 	};
 
-	placeKnob (timeSlider,     timeLabel,     0);
-	placeKnob (feedbackSlider, feedbackLabel, 1);
-	placeKnob (mixSlider,      mixLabel,      2);
-	placeKnob (lpSlider,       lpLabel,       3);
-	placeKnob (hpSlider,       hpLabel,       4);
+	placeKnob (timeSlider,       timeLabel,       0);
+	placeKnob (feedbackSlider,   feedbackLabel,   1);
+	placeKnob (mixSlider,        mixLabel,        2);
+	placeKnob (lpSlider,         lpLabel,         3);
+	placeKnob (hpSlider,         hpLabel,         4);
+	placeKnob (outputGainSlider, outputGainLabel, 5);
 
 	// Meter at the bottom
 	meter.setBounds (20, h - 42, w - 40, 22);

@@ -110,6 +110,9 @@ void BoDSPDelayAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
 	if (auto* hp = apvts.getRawParameterValue ("hp"))
 		delay.setHP (hp->load());
 
+	if (auto* p = apvts.getRawParameterValue ("outputGain"))
+		outputGain.setGainDecibels (p->load());
+
 	bool clip = false;
 	if (auto* p = apvts.getRawParameterValue ("softClip"))
 		clip = p->load() > 0.5f;
@@ -126,7 +129,7 @@ void BoDSPDelayAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
 		{
 			float* ptr = buffer.getWritePointer (ch);
 			const float dry = ptr[n];
-			float processed = delay.processSample (ch, dry, inLevel);
+			float processed = delay.processSample (ch, dry, inLevel) * outputGain.getGainLinear();
 			if (clip)
 				processed = softClipper.processSample (processed);
 			ptr[n] = processed;
@@ -134,7 +137,7 @@ void BoDSPDelayAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
 		}
 	}
 
-	outputMeter.store (meter.getPeak());
+	outputMeter.store (meter.getPeakHold());
 }
 
 void BoDSPDelayAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
@@ -177,6 +180,9 @@ juce::AudioProcessorValueTreeState::ParameterLayout BoDSPDelayAudioProcessor::cr
 		juce::NormalisableRange<float> (0.1f, 200.0f), 10.0f));
 	params.push_back (std::make_unique<juce::AudioParameterFloat> ("duckRelease", "Duck Release (ms)",
 		juce::NormalisableRange<float> (10.0f, 2000.0f), 200.0f));
+
+	params.push_back (std::make_unique<juce::AudioParameterFloat> ("outputGain", "Output Gain (dB)",
+		juce::NormalisableRange<float> (-24.0f, 24.0f, 0.1f), 0.0f));
 
 	params.push_back (std::make_unique<juce::AudioParameterBool> ("softClip", "Clipper", false));
 

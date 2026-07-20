@@ -63,6 +63,10 @@ void BoDSPChorusAudioProcessor::prepareToPlay (double sampleRate, int /*samplesP
     depthSmoothed.setMode (bodsp::ParameterSmoother::SmootherMode::Exponential);
     depthSmoothed.setTimeConstant (20.0f);
 
+    outputGainSmoothed.prepare (sampleRate);
+    outputGainSmoothed.setMode (bodsp::ParameterSmoother::SmootherMode::Exponential);
+    outputGainSmoothed.setTimeConstant (20.0f);
+
     softClipper.prepare (sampleRate);
     softClipper.setMode (bodsp::SoftClipper::ClipMode::Tanh);
 
@@ -80,6 +84,8 @@ void BoDSPChorusAudioProcessor::prepareToPlay (double sampleRate, int /*samplesP
         depthSmoothed.reset (p->load());
     if (auto* p = apvts.getRawParameterValue ("mix"))
         dryWet.setMix (p->load());
+    if (auto* p = apvts.getRawParameterValue ("outputGain"))
+        outputGainSmoothed.reset (juce::Decibels::decibelsToGain (p->load()));
 }
 
 void BoDSPChorusAudioProcessor::releaseResources() {}
@@ -121,6 +127,8 @@ void BoDSPChorusAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
         depthSmoothed.setTarget (p->load());
     if (auto* p = apvts.getRawParameterValue ("mix"))
         dryWet.setMix (p->load());
+    if (auto* p = apvts.getRawParameterValue ("outputGain"))
+        outputGainSmoothed.setTarget (juce::Decibels::decibelsToGain (p->load()));
 
     float fbAmt = 0.2f;
     if (auto* p = apvts.getRawParameterValue ("feedback"))
@@ -148,6 +156,7 @@ void BoDSPChorusAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
         // Advance smoothers
         const float rate  = rateSmoothed.getNextValue();
         const float depth = depthSmoothed.getNextValue();
+        const float outG  = outputGainSmoothed.getNextValue();
 
         // Update LFO rates (smooth re-tune)
         for (int v = 0; v < kVoices; ++v)
@@ -181,7 +190,7 @@ void BoDSPChorusAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
             feedback[1] = wet1;
 
             const float wetL = (wet0 + wet1) * 0.5f;
-            float outL = dryWet.process (dryL, wetL);
+            float outL = dryWet.process (dryL, wetL) * outG;
             if (clip) outL = softClipper.processSample (outL);
             ptrL[n] = outL;
             meter.processSample (outL);
@@ -205,14 +214,14 @@ void BoDSPChorusAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
             feedback[3] = wet3;
 
             const float wetR = (wet2 + wet3) * 0.5f;
-            float outR = dryWet.process (dryR, wetR);
+            float outR = dryWet.process (dryR, wetR) * outG;
             if (clip) outR = softClipper.processSample (outR);
             ptrR[n] = outR;
             meter.processSample (outR);
         }
     }
 
-    outputMeter.store (meter.getPeak());
+    outputMeter.store (meter.getPeakHold());
 }
 
 //==============================================================================
@@ -261,6 +270,12 @@ BoDSPChorusAudioProcessor::createParameterLayout()
         "spread", "Stereo Spread",
         juce::NormalisableRange<float> (0.0f, 1.0f),
         0.5f));
+
+    // Output Gain
+    params.push_back (std::make_unique<juce::AudioParameterFloat> (
+        "outputGain", "Output Gain",
+        juce::NormalisableRange<float> (-24.0f, 24.0f, 0.1f),
+        0.0f));
 
     // Soft clipper toggle
     params.push_back (std::make_unique<juce::AudioParameterBool> (

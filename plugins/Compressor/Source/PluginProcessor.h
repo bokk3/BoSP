@@ -5,20 +5,18 @@
 #include <atomic>
 
 // shared DSP
-#include "../../../shared/DSP/DelayLine.h"
-#include "../../../shared/DSP/LFO.h"
-#include "../../../shared/DSP/DryWet.h"
+#include "../../../shared/DSP/EnvelopeFollower.h"
 #include "../../../shared/DSP/ParameterSmoother.h"
-#include "../../../shared/DSP/SoftClipper.h"
 #include "../../../shared/DSP/Meter.h"
+#include "../../../shared/DSP/SoftClipper.h"
 
 //==============================================================================
-class BoDSPChorusAudioProcessor : public juce::AudioProcessor
+class BoDSPCompressorAudioProcessor : public juce::AudioProcessor
 {
 public:
     //==============================================================================
-    BoDSPChorusAudioProcessor();
-    ~BoDSPChorusAudioProcessor() override;
+    BoDSPCompressorAudioProcessor();
+    ~BoDSPCompressorAudioProcessor() override;
 
     float getOutputMeter() const noexcept { return outputMeter.load(); }
 
@@ -37,7 +35,7 @@ public:
     bool acceptsMidi() const override { return false; }
     bool producesMidi() const override { return false; }
     bool isMidiEffect() const override { return false; }
-    double getTailLengthSeconds() const override { return 0.05; }
+    double getTailLengthSeconds() const override { return 0.0; }
 
     int getNumPrograms() override { return 1; }
     int getCurrentProgram() override { return 0; }
@@ -52,31 +50,20 @@ public:
     static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
 
 private:
-    // -------------------------------------------------------------------
-    // Chorus DSP architecture:
-    //   2 voices per channel (4 total), each driven by its own LFO.
-    //   Voices per channel share the same base delay with spread offset.
-    //   Voice 0/1 → L channel   |   Voice 2/3 → R channel
-    //   Each pair has LFOs 90° apart for width.
-    // -------------------------------------------------------------------
-    static constexpr int kVoices = 4;   // 2 per channel
+    // ---- Compressor DSP ----
+    bodsp::EnvelopeFollower  envelopeFollower;
+    bodsp::Meter             meter;
+    bodsp::SoftClipper       softClipper;
 
-    bodsp::DelayLine       delayLines[kVoices];
-    bodsp::LFO             lfos[kVoices];
-    bodsp::DryWet          dryWet;
-    bodsp::ParameterSmoother rateSmoothed;
-    bodsp::ParameterSmoother depthSmoothed;
-    bodsp::ParameterSmoother outputGainSmoothed;
-    bodsp::SoftClipper     softClipper;
-    bodsp::Meter           meter;
-
-    // Maximum modulated delay: base (30ms) + max depth (15ms)
-    static constexpr float kMaxDelayMs = 45.0f;
-
-    // Feedback sample memory per voice
-    float feedback[kVoices] { 0.0f, 0.0f, 0.0f, 0.0f };
+    // Parameter smoothers for zipper-free adjustments
+    bodsp::ParameterSmoother thresholdSmoothed;
+    bodsp::ParameterSmoother ratioSmoothed;
+    bodsp::ParameterSmoother attackSmoothed;
+    bodsp::ParameterSmoother releaseSmoothed;
+    bodsp::ParameterSmoother makeupSmoothed;
+    bodsp::ParameterSmoother mixSmoothed;
 
     std::atomic<float> outputMeter { 0.0f };
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BoDSPChorusAudioProcessor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BoDSPCompressorAudioProcessor)
 };

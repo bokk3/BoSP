@@ -32,3 +32,5 @@ add_subdirectory(plugins/Delay)
 add_subdirectory(plugins/Reverb)
 add_subdirectory(plugins/Filter)
 add_subdirectory(plugins/Chorus)
+add_subdirectory(plugins/Compressor)
+

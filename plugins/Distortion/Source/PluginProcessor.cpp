@@ -236,7 +236,7 @@ void BoDSPDistortionAudioProcessor::processBlock (juce::AudioBuffer<float>& buff
     }
 
     // Publish peak to atomic for GUI
-    outputMeter.store (meter.getPeak());
+    outputMeter.store (meter.getPeakHold());
 }
 
 //==============================================================================

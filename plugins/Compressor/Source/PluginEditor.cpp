@@ -2,27 +2,31 @@
 #include "PluginProcessor.h"
 
 //==============================================================================
-BoDSPChorusAudioProcessorEditor::BoDSPChorusAudioProcessorEditor (BoDSPChorusAudioProcessor& p)
+BoDSPCompressorAudioProcessorEditor::BoDSPCompressorAudioProcessorEditor (BoDSPCompressorAudioProcessor& p)
     : AudioProcessorEditor (&p),
       audioProcessor (p),
       vuMeter (p),
-      rateAtt     (p.apvts, "rate",     rateKnob),
-      depthAtt    (p.apvts, "depth",    depthKnob),
-      mixAtt      (p.apvts, "mix",      mixKnob),
-      feedbackAtt (p.apvts, "feedback", feedbackKnob),
-      spreadAtt   (p.apvts, "spread",   spreadKnob),
-      outputGainAtt (p.apvts, "outputGain", outputGainKnob),
-      clipperAtt  (p.apvts, "softClip", clipperToggle)
+      thresholdAtt (p.apvts, "threshold", thresholdKnob),
+      ratioAtt     (p.apvts, "ratio",     ratioKnob),
+      attackAtt    (p.apvts, "attack",    attackKnob),
+      releaseAtt   (p.apvts, "release",   releaseKnob),
+      makeupAtt    (p.apvts, "makeup",    makeupKnob),
+      mixAtt       (p.apvts, "mix",       mixKnob),
+      clipperAtt   (p.apvts, "softClip",  clipperToggle)
 {
     // Setup each knob + label
-    setupKnob (rateKnob,       rateLabel,       "RATE");
-    setupKnob (depthKnob,      depthLabel,      "DEPTH");
-    setupKnob (mixKnob,        mixLabel,        "MIX");
-    setupKnob (feedbackKnob,   feedbackLabel,   "FEEDBACK");
-    setupKnob (spreadKnob,     spreadLabel,     "SPREAD");
-    setupKnob (outputGainKnob, outputGainLabel, "OUTPUT");
+    setupKnob (thresholdKnob, thresholdLabel, "THRESHOLD");
+    setupKnob (ratioKnob,     ratioLabel,     "RATIO");
+    setupKnob (attackKnob,    attackLabel,    "ATTACK");
+    setupKnob (releaseKnob,   releaseLabel,   "RELEASE");
+    setupKnob (makeupKnob,    makeupLabel,    "MAKEUP");
+    setupKnob (mixKnob,       mixLabel,       "MIX");
 
-    outputGainKnob.setTextValueSuffix (" dB");
+    thresholdKnob.setTextValueSuffix (" dB");
+    ratioKnob.setTextValueSuffix (":1");
+    attackKnob.setTextValueSuffix (" ms");
+    releaseKnob.setTextValueSuffix (" ms");
+    makeupKnob.setTextValueSuffix (" dB");
 
     // Clipper toggle
     clipperToggle.setColour (juce::ToggleButton::tickColourId,      juce::Colour (0xffff3300));
@@ -37,11 +41,11 @@ BoDSPChorusAudioProcessorEditor::BoDSPChorusAudioProcessorEditor (BoDSPChorusAud
     setResizeLimits (480, 220, 800, 380);
 }
 
-BoDSPChorusAudioProcessorEditor::~BoDSPChorusAudioProcessorEditor() {}
+BoDSPCompressorAudioProcessorEditor::~BoDSPCompressorAudioProcessorEditor() {}
 
 //==============================================================================
-void BoDSPChorusAudioProcessorEditor::setupKnob (juce::Slider& s, juce::Label& l,
-                                                  const juce::String& text)
+void BoDSPCompressorAudioProcessorEditor::setupKnob (juce::Slider& s, juce::Label& l,
+                                                     const juce::String& text)
 {
     s.setSliderStyle (juce::Slider::RotaryVerticalDrag);
     s.setTextBoxStyle (juce::Slider::TextBoxBelow, false, 70, 18);
@@ -61,7 +65,7 @@ void BoDSPChorusAudioProcessorEditor::setupKnob (juce::Slider& s, juce::Label& l
 }
 
 //==============================================================================
-void BoDSPChorusAudioProcessorEditor::paint (juce::Graphics& g)
+void BoDSPCompressorAudioProcessorEditor::paint (juce::Graphics& g)
 {
     const auto bounds = getLocalBounds().toFloat();
 
@@ -79,12 +83,12 @@ void BoDSPChorusAudioProcessorEditor::paint (juce::Graphics& g)
     // Plugin title
     g.setFont (juce::Font (22.0f, juce::Font::bold));
     g.setColour (juce::Colour (0xffff3300));
-    g.drawText ("BoDSP  CHORUS", 16, 10, 260, 32, juce::Justification::left, false);
+    g.drawText ("BoDSP  COMPRESSOR", 16, 10, 260, 32, juce::Justification::left, false);
 
     // Subtle subtitle
     g.setFont (juce::Font (10.5f));
     g.setColour (juce::Colour (0xff665577));
-    g.drawText ("4-VOICE STEREO MODULATOR", 16, 36, 260, 16, juce::Justification::left, false);
+    g.drawText ("STEREO FEEDFORWARD DYNAMICS", 16, 36, 260, 16, juce::Justification::left, false);
 
     // Separator line
     g.setColour (juce::Colour (0xff2a2535));
@@ -92,7 +96,7 @@ void BoDSPChorusAudioProcessorEditor::paint (juce::Graphics& g)
 }
 
 //==============================================================================
-void BoDSPChorusAudioProcessorEditor::resized()
+void BoDSPCompressorAudioProcessorEditor::resized()
 {
     const int w = getWidth();
     const int h = getHeight();
@@ -128,10 +132,10 @@ void BoDSPChorusAudioProcessorEditor::resized()
         s.setBounds (x, y + labelH, knobW, knobH);
     };
 
-    placeKnob (rateKnob,       rateLabel,       0);
-    placeKnob (depthKnob,      depthLabel,      1);
-    placeKnob (mixKnob,        mixLabel,        2);
-    placeKnob (feedbackKnob,   feedbackLabel,   3);
-    placeKnob (spreadKnob,     spreadLabel,     4);
-    placeKnob (outputGainKnob, outputGainLabel, 5);
+    placeKnob (thresholdKnob, thresholdLabel, 0);
+    placeKnob (ratioKnob,     ratioLabel,     1);
+    placeKnob (attackKnob,    attackLabel,    2);
+    placeKnob (releaseKnob,   releaseLabel,   3);
+    placeKnob (makeupKnob,    makeupLabel,    4);
+    placeKnob (mixKnob,       mixLabel,       5);
 }

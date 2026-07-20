@@ -9,6 +9,7 @@
 #include "../../../shared/DSP/DryWet.h"
 #include "../../../shared/DSP/SoftClipper.h"
 #include "../../../shared/DSP/Meter.h"
+#include "../../../shared/DSP/ParameterSmoother.h"
 
 class BoDSPFilterAudioProcessor  : public juce::AudioProcessor
 {
@@ -50,6 +51,7 @@ private:
 	bodsp::DryWet       dryWet;
 	bodsp::SoftClipper  softClipper;
 	bodsp::Meter        meter;
+	bodsp::ParameterSmoother outputGainSmoothed;
 
 	// Cache last mode index to avoid redundant setMode calls
 	int lastModeIndex { 0 };

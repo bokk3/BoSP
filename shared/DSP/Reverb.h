@@ -246,12 +246,13 @@ public:
 		float filteredWetR = hpRight.processSample (0, lpRight.processSample (0, apOutputR));
 
 		// 6. Apply stereo width cross-mix
-		// wet1 = w/2 + 0.5, wet2 = 1 - wet1
 		const float wet1 = width * 0.5f + 0.5f;
 		const float wet2 = 1.0f - wet1;
 
-		const float finalWetL = filteredWetL * wet1 + filteredWetR * wet2;
-		const float finalWetR = filteredWetR * wet1 + filteredWetL * wet2;
+		// Scale up the wet path to compensate for the 0.015 input attenuation.
+		const float wetGainCompensation = 8.0f;
+		const float finalWetL = (filteredWetL * wet1 + filteredWetR * wet2) * wetGainCompensation;
+		const float finalWetR = (filteredWetR * wet1 + filteredWetL * wet2) * wetGainCompensation;
 
 		// 7. Mix dry/wet
 		outL = dryL * (1.0f - mix) + finalWetL * mix;
