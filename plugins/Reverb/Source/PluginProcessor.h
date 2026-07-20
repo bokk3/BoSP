@@ -5,6 +5,8 @@
 
 // shared DSP
 #include "../../../shared/DSP/Reverb.h"
+#include "../../../shared/DSP/SoftClipper.h"
+#include "../../../shared/DSP/Meter.h"
 #include <atomic>
 
 class BoDSPReverbAudioProcessor  : public juce::AudioProcessor
@@ -44,7 +46,9 @@ public:
 
 private:
 	// DSP
-	bodsp::Reverb reverb;
+	bodsp::Reverb      reverb;
+	bodsp::SoftClipper softClipper;
+	bodsp::Meter       meter;
 
 	std::atomic<float> outputMeter { 0.0f };
 

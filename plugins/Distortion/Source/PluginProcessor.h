@@ -7,6 +7,10 @@
 #include "../../../shared/DSP/Gain.h"
 #include "../../../shared/DSP/WaveShaper.h"
 #include "../../../shared/DSP/Tone.h"
+#include "../../../shared/DSP/ParameterSmoother.h"
+#include "../../../shared/DSP/DryWet.h"
+#include "../../../shared/DSP/SoftClipper.h"
+#include "../../../shared/DSP/Meter.h"
 #include <atomic>
 
 //==============================================================================
@@ -60,27 +64,24 @@ public:
 
 private:
     // DSP components
-    bodsp::Gain inputGain;
-    bodsp::Gain outputGain;
-    bodsp::WaveShaper waveShaper;
-    bodsp::Tone toneFilter;
-    // Smoothed output gain (linear)
-    juce::LinearSmoothedValue<float> outputSmoothed { 1.0f };
-    static constexpr double outputSmoothingTimeSeconds = 0.02; // 20 ms
+    bodsp::Gain           inputGain;
+    bodsp::Gain           outputGain;
+    bodsp::WaveShaper     waveShaper;
+    bodsp::Tone           toneFilter;
+    bodsp::DryWet         dryWet;
+    bodsp::SoftClipper    softClipper;
+    bodsp::Meter          meter;
 
-    // Dry/Wet
-    static constexpr float defaultMix = 1.0f; // 1.0 == fully wet
-    float mix { defaultMix };
+    // Parameter smoothers (replaces juce::LinearSmoothedValue)
+    bodsp::ParameterSmoother driveSmoothed;
+    bodsp::ParameterSmoother outputSmoothed;
 
     // Parameter change caching
-    int lastModeIndex { -1 };
-    bool lastSoftClip { false };
-    // Output meter (peak, linear)
-    std::atomic<float> outputMeter { 0.0f };
+    int  lastModeIndex { -1 };
+    bool lastSoftClip  { false };
 
-    // Smoothed parameter for drive to avoid clicks when automating.
-    juce::LinearSmoothedValue<float> driveSmoothed { 1.0f };
-    static constexpr double driveSmoothingTimeSeconds = 0.02; // 20 ms
+    // Output meter (peak, linear) — read by GUI thread
+    std::atomic<float> outputMeter { 0.0f };
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BoDSPDistortionAudioProcessor)
 };

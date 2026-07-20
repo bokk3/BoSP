@@ -43,22 +43,25 @@ BoDSPReverbAudioProcessorEditor::BoDSPReverbAudioProcessorEditor (BoDSPReverbAud
 	setupTechnoKnob (widthSlider,    widthLabel,    "Width",      this);
 	setupTechnoKnob (mixSlider,      mixLabel,      "Mix",        this);
 	setupTechnoKnob (preDelaySlider, preDelayLabel, "Pre-Delay",  this);
-	setupTechnoKnob (lpSlider,       lpLabel,       "LP Cut",  this);
-	setupTechnoKnob (hpSlider,       hpLabel,       "HP Cut",  this);
+	setupTechnoKnob (lpSlider,       lpLabel,       "LP Cut",     this);
+	setupTechnoKnob (hpSlider,       hpLabel,       "HP Cut",     this);
+	setupTechnoKnob (outputGainSlider, outputGainLabel, "Output", this);
 
 	preDelaySlider.setTextValueSuffix (" ms");
 	lpSlider.setTextValueSuffix (" Hz");
 	hpSlider.setTextValueSuffix (" Hz");
+	outputGainSlider.setTextValueSuffix (" dB");
 	lpSlider.setSkewFactorFromMidPoint (5000.0);
 	hpSlider.setSkewFactorFromMidPoint (100.0);
 
-	roomSizeAttach = std::make_unique<Attach> (apvts, "roomSize",  roomSizeSlider);
-	dampingAttach  = std::make_unique<Attach> (apvts, "damping",   dampingSlider);
-	widthAttach    = std::make_unique<Attach> (apvts, "width",     widthSlider);
-	mixAttach      = std::make_unique<Attach> (apvts, "mix",       mixSlider);
-	preDelayAttach = std::make_unique<Attach> (apvts, "preDelay",  preDelaySlider);
-	lpAttach       = std::make_unique<Attach> (apvts, "lpCutoff",  lpSlider);
-	hpAttach       = std::make_unique<Attach> (apvts, "hpCutoff",  hpSlider);
+	roomSizeAttach  = std::make_unique<Attach> (apvts, "roomSize",   roomSizeSlider);
+	dampingAttach   = std::make_unique<Attach> (apvts, "damping",    dampingSlider);
+	widthAttach     = std::make_unique<Attach> (apvts, "width",      widthSlider);
+	mixAttach       = std::make_unique<Attach> (apvts, "mix",        mixSlider);
+	preDelayAttach  = std::make_unique<Attach> (apvts, "preDelay",   preDelaySlider);
+	lpAttach        = std::make_unique<Attach> (apvts, "lpCutoff",   lpSlider);
+	hpAttach        = std::make_unique<Attach> (apvts, "hpCutoff",   hpSlider);
+	outputGainAttach = std::make_unique<Attach> (apvts, "outputGain", outputGainSlider);
 
 	// Clipper Toggle
 	setupTechnoToggle (clipToggle, this);
@@ -99,8 +102,8 @@ void BoDSPReverbAudioProcessorEditor::resized()
 	const int w = getWidth();
 	const int h = getHeight();
 
-	// Knobs in a row
-	const int knobW = (w - 40) / 7;
+	// 8 knobs — widen slightly to fit
+	const int knobW = (w - 40) / 8;
 	const int knobH = juce::jmin (100, h - 120);
 	const int labelH = 18;
 	const int rowY = 48;
@@ -113,13 +116,14 @@ void BoDSPReverbAudioProcessorEditor::resized()
 		s.setBounds (x, rowY + labelH, knobW, knobH);
 	};
 
-	placeKnob (roomSizeSlider, roomSizeLabel, 0);
-	placeKnob (dampingSlider,  dampingLabel,  1);
-	placeKnob (widthSlider,    widthLabel,    2);
-	placeKnob (mixSlider,      mixLabel,      3);
-	placeKnob (preDelaySlider, preDelayLabel, 4);
-	placeKnob (lpSlider,       lpLabel,       5);
-	placeKnob (hpSlider,       hpLabel,       6);
+	placeKnob (roomSizeSlider,   roomSizeLabel,   0);
+	placeKnob (dampingSlider,    dampingLabel,    1);
+	placeKnob (widthSlider,      widthLabel,      2);
+	placeKnob (mixSlider,        mixLabel,        3);
+	placeKnob (preDelaySlider,   preDelayLabel,   4);
+	placeKnob (lpSlider,         lpLabel,         5);
+	placeKnob (hpSlider,         hpLabel,         6);
+	placeKnob (outputGainSlider, outputGainLabel, 7);
 
 	// Clipper placed next to title / top right header area
 	clipToggle.setBounds (w - 110, 8, 90, 24);

@@ -32,3 +32,5 @@ target_compile_definitions(BoDSPDistortion PRIVATE
     JUCE_USE_CURL=0
     JUCE_VST3_CAN_REPLACE_VST2=0
 )
+
+bodsp_setup_release_copy(BoDSPDistortion "BoDSP Distortion")

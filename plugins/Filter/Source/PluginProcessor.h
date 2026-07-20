@@ -6,6 +6,9 @@
 
 // shared DSP
 #include "../../../shared/DSP/BiquadFilter.h"
+#include "../../../shared/DSP/DryWet.h"
+#include "../../../shared/DSP/SoftClipper.h"
+#include "../../../shared/DSP/Meter.h"
 
 class BoDSPFilterAudioProcessor  : public juce::AudioProcessor
 {
@@ -44,6 +47,9 @@ public:
 
 private:
 	bodsp::BiquadFilter filter;
+	bodsp::DryWet       dryWet;
+	bodsp::SoftClipper  softClipper;
+	bodsp::Meter        meter;
 
 	// Cache last mode index to avoid redundant setMode calls
 	int lastModeIndex { 0 };

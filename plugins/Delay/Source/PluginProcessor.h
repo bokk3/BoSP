@@ -6,6 +6,8 @@
 // shared DSP
 #include "../../../shared/DSP/Gain.h"
 #include "../../../shared/DSP/Delay.h"
+#include "../../../shared/DSP/SoftClipper.h"
+#include "../../../shared/DSP/Meter.h"
 #include <atomic>
 
 class BoDSPDelayAudioProcessor  : public juce::AudioProcessor
@@ -45,9 +47,11 @@ public:
 
 private:
 	// DSP
-	bodsp::Gain inputGain;
-	bodsp::Gain outputGain;
-	bodsp::Delay delay;
+	bodsp::Gain        inputGain;
+	bodsp::Gain        outputGain;
+	bodsp::Delay       delay;
+	bodsp::SoftClipper softClipper;
+	bodsp::Meter       meter;
 
 	std::atomic<float> outputMeter { 0.0f };
 
